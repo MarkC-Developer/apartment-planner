@@ -1,0 +1,21 @@
+[package]
+name = "apartment-planner"
+version = "1.0.0"
+description = "Apartment Planner — a local-first spatial and process planning tool"
+edition = "2021"
+
+[lib]
+name = "apartment_planner_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "6"
+chrono = "0.4"
