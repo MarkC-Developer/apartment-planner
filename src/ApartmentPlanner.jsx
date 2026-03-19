@@ -84,7 +84,7 @@ export default function App(){
   },[]);
   const clearToast=useCallback(()=>{if(toastTimer.current)clearTimeout(toastTimer.current);setToastMsg(null);setToastUndo(null);setToastWarn(false)},[]);
 
-  useEffect(()=>{invoke("set_theme",{theme:dark?"dark":"light"}).catch(()=>{});try{getCurrentWindow().setTheme(dark?"dark":"light")}catch{}},[dark]);
+  useEffect(()=>{invoke("set_theme",{theme:dark?"dark":"light"}).catch(()=>{});getCurrentWindow().setTheme(dark?"dark":"light").catch(()=>{})},[dark]);
   useEffect(()=>{let el=document.getElementById("apt-ts");if(!el){el=document.createElement("style");el.id="apt-ts";document.head.appendChild(el)}el.textContent=`select,option{background:${t.selBg}!important;color:${t.selTx}!important}option:checked{background:${t.selH}!important}select:focus{outline:1px solid ${t.acBd}}body{background:${t.bg}}`},[t]);
 
   // Persistence — Plans are .json files on disk, config tracks recents + last file
@@ -573,10 +573,10 @@ export default function App(){
           </div>
         </div>
         <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
-          <button onClick={()=>setDark(d=>!d)} style={{...s.bSm,fontSize:13,padding:"3px 10px",lineHeight:1}} title={dark?"Light":"Dark"}>{dark?"☼":"☽"}</button>
+          <button onClick={()=>setDark(d=>!d)} style={{...s.bSm,fontSize:13,padding:"4px 8px",lineHeight:1,height:28,width:28,display:"flex",alignItems:"center",justifyContent:"center"}} title={dark?"Light":"Dark"}>{dark?"☼":"☽"}</button>
           <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
           <div style={{position:"relative"}}>
-            <button style={s.bSm} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">◱ Open</button>
+            <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">◱ Open</button>
             {ctxMenu&&<><div onClick={()=>setCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999}}/><div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,background:t.dBg,border:`1px solid ${t.dBd}`,borderRadius:6,padding:4,zIndex:1000,boxShadow:"0 8px 24px rgba(0,0,0,0.3)",minWidth:140}}>
               <div onClick={()=>{openFile();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.tx,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>◱ Open File…</div>
               {recentFiles.length>0&&<><div style={{borderTop:`1px solid ${t.bdL}`,margin:"2px 0"}}/>{recentFiles.slice(0,5).map(f=><div key={f.path} onClick={()=>{loadRecent(f.path);setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:11,color:t.txM,cursor:"pointer",borderRadius:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{f.name}</div>)}</>}
@@ -584,8 +584,8 @@ export default function App(){
               <div onClick={()=>{resetDef();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.txD,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>See Sample</div>
             </div></>}
           </div>
-          <button style={s.bSm} onClick={()=>saveAs(data?.name||"plan")} title="Save As…">◈ Save</button>
-          <button style={s.bSm} onClick={()=>startNew()} title="New blank plan">▱ New</button>
+          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>saveAs(data?.name||"plan")} title="Save As…">◈ Save</button>
+          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">▱ New</button>
           <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
           <div style={{display:"flex",background:t.bsBg,borderRadius:8,padding:2}}>{[{k:"spatial",l:"Spaces",i:"▣"},{k:"process",l:"Processes",i:"▷"}].map(v=><div key={v.k} onClick={()=>{setView(v.k);setSelIt(null)}} style={{padding:"5px 12px",borderRadius:6,fontSize:12,cursor:"pointer",fontWeight:view===v.k?600:400,background:view===v.k?t.acS:"transparent",color:view===v.k?t.tx:t.txD}}>{v.i} {v.l}</div>)}</div>
         </div>
