@@ -6,9 +6,9 @@ A local-first spatial and process planning tool. Your data lives as `.json` file
 
 ```
 apartment-planner-tauri/
-├── src/                     # React frontend (unchanged from browser version)
+├── src/                     # React frontend
 │   ├── main.jsx             # React entry point
-│   └── ApartmentPlanner.jsx # Main component (only persistence layer changed)
+│   └── ApartmentPlanner.jsx # Main component
 ├── src-tauri/               # Rust backend
 │   ├── src/
 │   │   ├── main.rs          # Entry point
