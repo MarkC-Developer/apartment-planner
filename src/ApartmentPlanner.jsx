@@ -34,7 +34,7 @@ const BLANK={name:"New Apartment",lastSaved:null,items:[],spaces:[{id:"s_apt",na
 const DEF={name:"My Apartment",lastSaved:null,
 items:[mk("i1","Hydrating Cleanser","CeraVe","200ml","Skincare",1,1,null,"","","Replace every 2-3mo.",["s_bath_vanity_top_left"]),mk("i2","2% BHA Exfoliant","Paula's Choice","118ml","Skincare",1,1,null,"","https://www.paulaschoice.com/skin-perfecting-2pct-bha-liquid-exfoliant/201.html","PM only.",["s_bath_vanity_top_left"]),mk("i3","Vitamin C Serum","Timeless","20% CE Ferulic 1oz","Skincare",1,0,26,"","","Refrigerate. AM only.",["s_bath_vanity_top_left"]),mk("i4","Moisturizing Cream","CeraVe","16oz Tub","Skincare",1,1,null,"","","AM+PM.",["s_bath_vanity_top_right"]),mk("i5","Anthelios SPF 50","La Roche-Posay","Melt-In Milk 3oz","Skincare",1,1,null,"","","AM only.",["s_bath_vanity_top_right"]),mk("i6","Filtered Showerhead","AquaBliss","SF220","Fixture",1,0,45,'3.5" dia',"","Removes chlorine.",["s_bath_shower"]),mk("i7","Pure-Castile Soap","Dr. Bronner's","Peppermint 32oz","Body Care",1,1,null,"","","Dilute.",["s_bath_shower_caddy"]),mk("i8","Bond Maintenance Shampoo","Olaplex","No.4","Hair Care",1,1,null,"","","",["s_bath_shower_caddy"]),mk("i9","Bond Maintenance Conditioner","Olaplex","No.5","Hair Care",1,1,null,"","","Leave 3 min.",["s_bath_shower_caddy"]),mk("i10","Microfiber Hair Towel","","","Textile",1,1,null,"","","",["s_bath_towel_bar"]),mk("i11","Cleaning Caddy","","","Cleaning",1,0,15,'11"x7"x9"',"","",["s_bath_undersink"]),mk("i12","All-Purpose Cleaner","Method","Lavender 28oz","Cleaning",1,1,null,"","","",["s_bath_undersink"]),mk("i13","Chef's Knife 8\"","Victorinox","Fibrox Pro","Cookware",1,1,null,'8" blade',"","Hone before use.",["s_kit_knife_block"]),mk("i14","Cutting Board","","Large Wood","Cookware",1,1,null,'18"x12"',"","Oil monthly.",["s_kit_counter_zone"]),mk("i15","Cast Iron Skillet 12\"","Lodge","L10SK3","Cookware",1,1,null,'12" dia',"","No soap.",["s_kit_cabinet_lower_1"]),mk("i16","Pressure Cooker 6qt","Instant Pot","Duo 7-in-1","Appliance",1,1,null,'13.4"x12.2"x12.5"',"","",["s_kit_counter_appliance"]),mk("i17","Compact Dish Rack","SimpleHuman","KT1179","Kitchen",1,0,30,'16"x12"x5"',"","",["s_kit_counter_sink"]),mk("i18","Standing Desk 60\"","Uplift","V2 C-Frame","Furniture",1,0,599,'60"x30"x28-50"',"https://www.upliftdesk.com/uplift-v2-standing-desk/","",["s_office_desk_zone"],[],"s_office_desk"),mk("i19","27\" 4K Monitor","LG","27UN850-W","Electronics",1,1,null,'24.1"x17.9"',"","VESA.",["s_office_desk_surface_center"]),mk("i20","Monitor Arm","Ergotron","LX","Electronics",1,0,130,""  ,"","",["s_office_desk_surface_center"]),mk("i21","MacBook Pro 14\"","Apple","M3 Pro","Electronics",1,1,null,'12.3"x8.7"',"","",["s_office_desk_surface_left"]),mk("i22","TB4 Dock","CalDigit","TS4","Electronics",1,0,280,'5.5"x3.7"',"","Single-cable.",["s_office_desk_surface_left"]),mk("i23","Drawer Organizer","","","Organization",1,0,18,'12"x9"x2"',"","",["s_office_desk_drawer"]),mk("i24","Low Profile Keyboard","Keychron","K3 v2 Brown","Electronics",1,1,null,'11.7"x4.2"',"","",["s_office_desk_surface_center"]),mk("i25","PRO Yoga Mat","Manduka","PRO 71\"","Fitness",1,1,null,'71"x26"',"","",["s_den_floor"]),mk("i26","Adjustable Dumbbells","Bowflex","552","Fitness",1,0,349,'15.75"x8"x9" ea',"","",["s_den_rack"]),mk("i27","Resistance Bands","","5-band set","Fitness",1,1,null,"","","",["s_den_door_hook"]),mk("i28","Mesh Laundry Bags","","Set of 4","Laundry",1,0,12,"","","",["s_laundry_shelf"]),mk("i29","Liquid Detergent","Tide","Free & Gentle","Laundry",1,1,null,"","","",["s_laundry_shelf"]),mk("i30","Stain Remover Pen","Tide","To Go","Laundry",2,0,6,"","","One laundry+one closet.",["s_laundry_shelf"]),mk("i31","Tension Pole Shower Caddy","","","Organization",1,0,35,'11"x4.5"x60-97"',"","",["s_bath_shower"],[],"s_bath_shower_caddy")],
 spaces:[{id:"s_apt",name:"Apartment",type:"unit",parent:null,dimensions:"",notes:"2BR+Den",linkedItemId:null},{id:"s_bath",name:"Bathroom (Primary)",type:"room",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null},{id:"s_bath_vanity",name:"Vanity",type:"furniture",parent:"s_bath",dimensions:'36"x20"x34"',notes:"Built-in.",linkedItemId:null},{id:"s_bath_vanity_top_left",name:"Top Drawer — Left",type:"container",parent:"s_bath_vanity",dimensions:'8"x14"x3"',notes:"",linkedItemId:null},{id:"s_bath_vanity_top_right",name:"Top Drawer — Right",type:"container",parent:"s_bath_vanity",dimensions:'8"x14"x3"',notes:"",linkedItemId:null},{id:"s_bath_undersink",name:"Under-Sink Cabinet",type:"container",parent:"s_bath",dimensions:'30"x18"x18"',notes:"",linkedItemId:null},{id:"s_bath_shower",name:"Shower",type:"zone",parent:"s_bath",dimensions:"",notes:"",linkedItemId:null},{id:"s_bath_shower_caddy",name:"Shower Caddy",type:"container",parent:"s_bath_shower",dimensions:'11"x4.5"x26"',notes:"",linkedItemId:"i31"},{id:"s_bath_towel_bar",name:"Towel Bar",type:"fixture",parent:"s_bath",dimensions:'24"',notes:"",linkedItemId:null},{id:"s_kit",name:"Kitchen",type:"room",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null},{id:"s_kit_counter_zone",name:"Counter — Prep",type:"zone",parent:"s_kit",dimensions:'24"x24"',notes:"",linkedItemId:null},{id:"s_kit_counter_appliance",name:"Counter — Appliance",type:"zone",parent:"s_kit",dimensions:'18"x24"',notes:"",linkedItemId:null},{id:"s_kit_counter_sink",name:"Counter — Sink",type:"zone",parent:"s_kit",dimensions:'16"x24"',notes:"",linkedItemId:null},{id:"s_kit_knife_block",name:"Knife Block",type:"container",parent:"s_kit",dimensions:'6"x4"x9"',notes:"",linkedItemId:null},{id:"s_kit_cabinet_lower_1",name:"Lower Cabinet #1",type:"container",parent:"s_kit",dimensions:'24"x22"x14"',notes:"",linkedItemId:null},{id:"s_bed",name:"Bedroom (Primary)",type:"room",parent:"s_apt",dimensions:"",notes:"Also office",linkedItemId:null},{id:"s_office_desk_zone",name:"Desk Zone",type:"zone",parent:"s_bed",dimensions:'60"x36"',notes:"",linkedItemId:null},{id:"s_office_desk",name:"Standing Desk",type:"furniture",parent:"s_office_desk_zone",dimensions:'60"x30"x28-50"',notes:"Uplift V2",linkedItemId:"i18"},{id:"s_office_desk_surface_left",name:"Desk — Left",type:"container",parent:"s_office_desk",dimensions:'20"x30"',notes:"",linkedItemId:null},{id:"s_office_desk_surface_center",name:"Desk — Center",type:"container",parent:"s_office_desk",dimensions:'24"x30"',notes:"",linkedItemId:null},{id:"s_office_desk_drawer",name:"Desk Drawer",type:"container",parent:"s_office_desk",dimensions:'14"x20"x3"',notes:"",linkedItemId:null},{id:"s_bed2",name:"Bedroom (Secondary)",type:"room",parent:"s_apt",dimensions:"",notes:"Guest/flex",linkedItemId:null},{id:"s_den",name:"Den (Exercise)",type:"room",parent:"s_apt",dimensions:"8'x10'",notes:"",linkedItemId:null},{id:"s_den_floor",name:"Floor Space",type:"zone",parent:"s_den",dimensions:"6'x4'",notes:"",linkedItemId:null},{id:"s_den_rack",name:"Equipment Shelf",type:"furniture",parent:"s_den",dimensions:'24"x18"x36"',notes:"",linkedItemId:null},{id:"s_den_door_hook",name:"Door Hook",type:"fixture",parent:"s_den",dimensions:"",notes:"",linkedItemId:null},{id:"s_laundry",name:"Laundry Area",type:"zone",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null},{id:"s_laundry_shelf",name:"Laundry Shelf",type:"container",parent:"s_laundry",dimensions:'24"x12"',notes:"",linkedItemId:null},{id:"s_living",name:"Living Room",type:"room",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null},{id:"s_entry",name:"Entryway",type:"zone",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null}],
-processes:[{id:"p_morning",name:"Full Morning Routine",frequency:"Daily",location:"s_bath",parent:null,steps:[{num:1,action:"Shower Routine",itemId:null,subProcId:"p_shower"},{num:2,action:"Morning Skincare",itemId:null,subProcId:"p_morning_skincare"},{num:3,action:"Work Session Setup",itemId:null,subProcId:"p_work_session"}]},{id:"p_morning_skincare",name:"Morning Skincare",frequency:"Daily",location:"s_bath",parent:"p_morning",steps:[{num:1,action:"Rinse face",itemId:"i6"},{num:2,action:"Cleanser 60s",itemId:"i1"},{num:3,action:"Vitamin C",itemId:"i3"},{num:4,action:"Moisturizer",itemId:"i4"},{num:5,action:"SPF",itemId:"i5"}]},{id:"p_evening_skincare",name:"Evening Skincare",frequency:"Daily",location:"s_bath",parent:null,steps:[{num:1,action:"Cleanse",itemId:"i1"},{num:2,action:"Pat dry",itemId:null},{num:3,action:"BHA exfoliant",itemId:"i2"},{num:4,action:"Moisturizer",itemId:"i4"}]},{id:"p_shower",name:"Shower Routine",frequency:"Daily",location:"s_bath_shower",parent:"p_morning",steps:[{num:1,action:"Warm water",itemId:"i6"},{num:2,action:"Body wash",itemId:"i7"},{num:3,action:"Shampoo",itemId:"i8"},{num:4,action:"Conditioner 3 min",itemId:"i9"},{num:5,action:"Cool rinse",itemId:null},{num:6,action:"Microfiber towel",itemId:"i10"}]},{id:"p_work_session",name:"Work Session Setup",frequency:"Daily",location:"s_office_desk_zone",parent:"p_morning",steps:[{num:1,action:"Raise desk",itemId:"i18"},{num:2,action:"Wake monitor",itemId:"i19"},{num:3,action:"Connect USB-C",itemId:"i22"},{num:4,action:"Task manager",itemId:null}]},{id:"p_meal_prep",name:"Meal Prep",frequency:"2x per Week",location:"s_kit",parent:null,steps:[{num:1,action:"Sanitize, cutting board",itemId:"i14"},{num:2,action:"Hone knife, prep veg",itemId:"i13"},{num:3,action:"Prep proteins",itemId:null},{num:4,action:"Cast iron cook",itemId:"i15"},{num:5,action:"Instant Pot batch",itemId:"i16"},{num:6,action:"Portion & label",itemId:null}]},{id:"p_workout",name:"Home Workout",frequency:"4x per Week",location:"s_den",parent:null,steps:[{num:1,action:"Unroll mat",itemId:"i25"},{num:2,action:"Warm-up bands",itemId:"i27"},{num:3,action:"Dumbbells",itemId:"i26"},{num:4,action:"Cool-down",itemId:"i25"}]},{id:"p_laundry",name:"Laundry Cycle",frequency:"Weekly",location:"s_laundry",parent:null,steps:[{num:1,action:"Sort, mesh bags",itemId:"i28"},{num:2,action:"Pre-treat",itemId:"i30"},{num:3,action:"Wash cold",itemId:"i29"},{num:4,action:"Dry/hang",itemId:null},{num:5,action:"Fold",itemId:null}]},{id:"p_clean_bathroom",name:"Bathroom Clean",frequency:"Weekly",location:"s_bath",parent:null,steps:[{num:1,action:"Cleaning caddy",itemId:"i11"},{num:2,action:"Spray surfaces",itemId:"i12"},{num:3,action:"Scrub",itemId:null},{num:4,action:"Mirror+fixtures",itemId:null},{num:5,action:"Mop",itemId:null}]},{id:"p_clean_kitchen",name:"Kitchen Cleanup",frequency:"Daily",location:"s_kit",parent:null,steps:[{num:1,action:"Clear dishes",itemId:null},{num:2,action:"Wash",itemId:null},{num:3,action:"Wipe counters",itemId:"i12"},{num:4,action:"Stovetop",itemId:null},{num:5,action:"Cast iron",itemId:"i15"},{num:6,action:"Rack dry",itemId:"i17"}]},{id:"p_evening_wind_down",name:"Evening Wind-Down",frequency:"Daily",location:"s_bed",parent:null,steps:[{num:1,action:"Phone away",itemId:null},{num:2,action:"Dim lights",itemId:null},{num:3,action:"Lower desk, read",itemId:"i18"},{num:4,action:"Evening skincare",itemId:null}]}]};
+processes:[{id:"p_morning",name:"Full Morning Routine",frequency:"Daily",location:"s_bath",parent:null,steps:[{num:1,action:"Shower Routine",itemId:null,subProcId:"p_shower"},{num:2,action:"Morning Skincare",itemId:null,subProcId:"p_morning_skincare"},{num:3,action:"Work Session Setup",itemId:null,subProcId:"p_work_session"}]},{id:"p_shower",name:"Shower Routine",frequency:"Daily",location:"s_bath_shower",parent:"p_morning",steps:[{num:1,action:"Warm water",itemId:"i6"},{num:2,action:"Body wash",itemId:"i7"},{num:3,action:"Shampoo",itemId:"i8"},{num:4,action:"Conditioner 3 min",itemId:"i9"},{num:5,action:"Cool rinse",itemId:null},{num:6,action:"Microfiber towel",itemId:"i10"}]},{id:"p_morning_skincare",name:"Morning Skincare",frequency:"Daily",location:"s_bath",parent:"p_morning",steps:[{num:1,action:"Rinse face",itemId:"i6"},{num:2,action:"Cleanser 60s",itemId:"i1"},{num:3,action:"Vitamin C",itemId:"i3"},{num:4,action:"Moisturizer",itemId:"i4"},{num:5,action:"SPF",itemId:"i5"}]},{id:"p_work_session",name:"Work Session Setup",frequency:"Daily",location:"s_office_desk_zone",parent:"p_morning",steps:[{num:1,action:"Raise desk",itemId:"i18"},{num:2,action:"Wake monitor",itemId:"i19"},{num:3,action:"Connect USB-C",itemId:"i22"},{num:4,action:"Task manager",itemId:null}]},{id:"p_evening_skincare",name:"Evening Skincare",frequency:"Daily",location:"s_bath",parent:null,steps:[{num:1,action:"Cleanse",itemId:"i1"},{num:2,action:"Pat dry",itemId:null},{num:3,action:"BHA exfoliant",itemId:"i2"},{num:4,action:"Moisturizer",itemId:"i4"}]},{id:"p_meal_prep",name:"Meal Prep",frequency:"2x per Week",location:"s_kit",parent:null,steps:[{num:1,action:"Sanitize, cutting board",itemId:"i14"},{num:2,action:"Hone knife, prep veg",itemId:"i13"},{num:3,action:"Prep proteins",itemId:null},{num:4,action:"Cast iron cook",itemId:"i15"},{num:5,action:"Instant Pot batch",itemId:"i16"},{num:6,action:"Portion & label",itemId:null}]},{id:"p_workout",name:"Home Workout",frequency:"4x per Week",location:"s_den",parent:null,steps:[{num:1,action:"Unroll mat",itemId:"i25"},{num:2,action:"Warm-up bands",itemId:"i27"},{num:3,action:"Dumbbells",itemId:"i26"},{num:4,action:"Cool-down",itemId:"i25"}]},{id:"p_laundry",name:"Laundry Cycle",frequency:"Weekly",location:"s_laundry",parent:null,steps:[{num:1,action:"Sort, mesh bags",itemId:"i28"},{num:2,action:"Pre-treat",itemId:"i30"},{num:3,action:"Wash cold",itemId:"i29"},{num:4,action:"Dry/hang",itemId:null},{num:5,action:"Fold",itemId:null}]},{id:"p_clean_bathroom",name:"Bathroom Clean",frequency:"Weekly",location:"s_bath",parent:null,steps:[{num:1,action:"Cleaning caddy",itemId:"i11"},{num:2,action:"Spray surfaces",itemId:"i12"},{num:3,action:"Scrub",itemId:null},{num:4,action:"Mirror+fixtures",itemId:null},{num:5,action:"Mop",itemId:null}]},{id:"p_clean_kitchen",name:"Kitchen Cleanup",frequency:"Daily",location:"s_kit",parent:null,steps:[{num:1,action:"Clear dishes",itemId:null},{num:2,action:"Wash",itemId:null},{num:3,action:"Wipe counters",itemId:"i12"},{num:4,action:"Stovetop",itemId:null},{num:5,action:"Cast iron",itemId:"i15"},{num:6,action:"Rack dry",itemId:"i17"}]},{id:"p_evening_wind_down",name:"Evening Wind-Down",frequency:"Daily",location:"s_bed",parent:null,steps:[{num:1,action:"Phone away",itemId:null},{num:2,action:"Dim lights",itemId:null},{num:3,action:"Lower desk, read",itemId:"i18"},{num:4,action:"Evening skincare",itemId:null}]}]};
 
 // ─── COMBOBOX ─────────────────────────────────────────────────────────────────
 function ComboBox({t,options,value,onChange,placeholder,onAdd,addLabel,s,extraTop}){
@@ -76,6 +76,10 @@ export default function App(){
   const[treeFilter,setTreeFilter]=useState(null); // null | "owned" | "needed"
   const nameRef=useRef(null);const undoRef=useRef(null);const toastTimer=useRef(null);
   const[ctxMenu,setCtxMenu]=useState(null); // {x, y} for right-click context menu
+  const[cfm,setCfm]=useState(null); // {msg, resolve} for custom confirm
+  const[isMaximized,setIsMaximized]=useState(false);
+  const askConfirm=useCallback(msg=>new Promise(resolve=>setCfm({msg,resolve})),[]);
+  const isSample=!activePath&&data?.name==="My Apartment"; // differentiates sample from new blank
 
   const toast=useCallback((msg,undoFn,warn)=>{
     if(toastTimer.current)clearTimeout(toastTimer.current);
@@ -86,6 +90,8 @@ export default function App(){
 
   useEffect(()=>{invoke("set_theme",{theme:dark?"dark":"light"}).catch(()=>{});getCurrentWindow().setTheme(dark?"dark":"light").catch(()=>{})},[dark]);
   useEffect(()=>{let el=document.getElementById("apt-ts");if(!el){el=document.createElement("style");el.id="apt-ts";document.head.appendChild(el)}el.textContent=`select,option{background:${t.selBg}!important;color:${t.selTx}!important}option:checked{background:${t.selH}!important}select:focus{outline:1px solid ${t.acBd}}body{background:${t.bg}}`},[t]);
+  // Track maximized state for title bar button
+  useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
 
   // Persistence — Plans are .json files on disk, config tracks recents + last file
   useEffect(()=>{(async()=>{
@@ -143,7 +149,7 @@ export default function App(){
 
   // Open file: native Open dialog
   const openFile=useCallback(async()=>{
-    if(activePath&&dirty&&data){const save=confirm("You have unsaved changes. Save before opening?");if(save)await writePlan(activePath,data).catch(()=>{})}
+    if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before opening?");if(save)await writePlan(activePath,data).catch(()=>{})}
     const path=await openDialog({defaultPath:lastDir||undefined,filters:[{name:"Plan",extensions:["json"]}],multiple:false});
     if(!path)return;
     try{
@@ -158,7 +164,7 @@ export default function App(){
 
   // Load from recent file
   const loadRecent=useCallback(async(path)=>{
-    if(activePath&&dirty&&data){const save=confirm("You have unsaved changes. Save before switching?");if(save)await writePlan(activePath,data).catch(()=>{})}
+    if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before switching?");if(save)await writePlan(activePath,data).catch(()=>{})}
     try{
       const content=await invoke("read_plan",{path});
       const d=migrate(JSON.parse(content));setData(d);
@@ -179,21 +185,21 @@ export default function App(){
     setRecentFiles(cfg.recent_files||[]);
   },[]);
 
-  const startNew=useCallback(()=>{
-    if(activePath&&dirty&&data){const save=confirm("You have unsaved changes. Save before starting new?");if(save)writePlan(activePath,data).catch(()=>{})}
-    if(!confirm("Start a new blank plan?\n\nYour existing files will not be affected."))return;
+  const startNew=useCallback(async()=>{
+    if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before starting new?");if(save)await writePlan(activePath,data).catch(()=>{})}
+    if(!await askConfirm("Start a new blank plan?\n\nYour existing files will not be affected."))return;
     const d=JSON.parse(JSON.stringify(BLANK));setData(d);
     setActivePath(null);setDirty(false);setLastSaved(null);
     setSelSp("s_apt");setSelPr(null);setSelIt(null);setExp({});toast("New blank — save to create a file")
-  },[activePath,dirty,data,writePlan,toast]);
+  },[activePath,dirty,data,writePlan,toast,askConfirm]);
 
-  const resetDef=useCallback(()=>{
-    if(activePath&&dirty&&data){const save=confirm("You have unsaved changes. Save before switching?");if(save)writePlan(activePath,data).catch(()=>{})}
-    if(!confirm("Switch to the sample data?\n\nYour saved files will not be affected."))return;
+  const resetDef=useCallback(async()=>{
+    if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before switching?");if(save)await writePlan(activePath,data).catch(()=>{})}
+    if(!await askConfirm("Switch to the sample data?\n\nYour saved files will not be affected."))return;
     const d=JSON.parse(JSON.stringify(DEF));setData(d);
     setActivePath(null);setDirty(false);setLastSaved(null);
     setSelSp("s_apt");setSelPr(null);setSelIt(null);toast("Viewing sample")
-  },[activePath,dirty,data,writePlan,toast]);
+  },[activePath,dirty,data,writePlan,toast,askConfirm]);
 
   // Rename: write to new path, delete old file (within same directory)
   const renamePlan=useCallback(async(newName)=>{
@@ -284,7 +290,8 @@ export default function App(){
   const shopTotal=useMemo(()=>shopItems.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),[shopItems]);
 
   const exportShop=useCallback(async()=>{const rows=shopItems.map(i=>({Item:dName(i),Model:i.model||"",Category:i.category||"","Qty Needed":sfall(i),"Cost/Item":i.cost||"","Line Total":sfall(i)*(i.cost||0),URL:i.url||"",Notes:i.notes||""}));rows.push({Item:"",Model:"",Category:"","Qty Needed":"","Cost/Item":"TOTAL:","Line Total":shopTotal,URL:"",Notes:""});const ws=XLSX.utils.json_to_sheet(rows);rows.forEach((r,i)=>{if(r.URL){const cell=XLSX.utils.encode_cell({r:i+1,c:6});if(ws[cell])ws[cell].l={Target:r.URL}}});ws["!cols"]=[{wch:35},{wch:20},{wch:14},{wch:10},{wch:10},{wch:12},{wch:40},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Shopping List");
-    const path=await saveDialog({defaultPath:lastDir?`${lastDir}/shopping_list_${new Date().toISOString().slice(0,10)}.xlsx`:`shopping_list_${new Date().toISOString().slice(0,10)}.xlsx`,filters:[{name:"Excel",extensions:["xlsx"]}]});
+    const planLabel=(data?.name||"Plan").replace(/[<>:"/\\|?*]/g,"");
+    const path=await saveDialog({defaultPath:lastDir?`${lastDir}/Shopping List - ${planLabel}.xlsx`:`Shopping List - ${planLabel}.xlsx`,filters:[{name:"Excel",extensions:["xlsx"]}]});
     if(!path)return;
     const buf=XLSX.write(wb,{type:"array",bookType:"xlsx"});
     const bytes=Array.from(new Uint8Array(buf));
@@ -466,7 +473,7 @@ export default function App(){
       {!isRoot&&<Fld t={t} label="Linked Item"><select style={s.sel} value={form.linkedItemId||""} onChange={ev=>setForm({linkedItemId:ev.target.value||null})}><option value="">None</option>{itemsLink.map(i=><option key={i.id} value={i.id}>{dName(i)}</option>)}</select></Fld>}
       <Fld t={t} label="Notes"><textarea style={{...s.input,minHeight:40,resize:"vertical"}} value={form.notes} onChange={ev=>setForm({notes:ev.target.value})}/></Fld>
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-        {isEdit&&form.id!=="s_apt"&&<button style={s.bD} onClick={()=>{if(confirm(`Delete "${form.name}"?`)){rmSp(form.id);setSelSp(form.parent||"s_apt");setModal(null)}}}>Delete</button>}
+        {isEdit&&form.id!=="s_apt"&&<button style={s.bD} onClick={async()=>{if(await askConfirm(`Delete "${form.name}"?`)){rmSp(form.id);setSelSp(form.parent||"s_apt");setModal(null)}}}>Delete</button>}
         <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
         <button style={s.bP} onClick={()=>{const e=valSp(form);setValE(e);if(Object.keys(e).length)return;const saveForm=isRoot?{...form,type:"unit",linkedItemId:null}:form;if(isEdit){edSp(form.id,saveForm);if(!isRoot&&saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:form.id,dimensions:saveForm.dimensions||""})}}else{const ns={...saveForm,id:uid("s")};addSp(ns);if(saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:ns.id,dimensions:saveForm.dimensions||""})}setSelSp(ns.id)}setModal(null)}}>{isRoot?"Save":isEdit?"Save":"Add Space"}</button>
       </div>
@@ -498,7 +505,7 @@ export default function App(){
                   <input style={{...s.input}} value={step.action} onChange={ev=>{setForm(f=>{const st=[...f.steps];st[idx]={...st[idx],action:ev.target.value};return{...f,steps:st}});if(linkedProc)edPr(step.subProcId,{name:ev.target.value})}} placeholder="Step…"/>
                   <div style={{display:"flex",alignItems:"center",gap:4}}>
                     <span style={{fontSize:11,color:t.pp,flex:1,padding:"6px 12px",background:t.ppBg,borderRadius:6}}>{linkedProc?.name||"Sub-process"}</span>
-                    <button style={{...s.bSm,color:t.wn,padding:"6px 10px"}} onClick={()=>{if(confirm(`Delete process "${linkedProc?.name||"sub-process"}"?`)){rmPr(step.subProcId);setForm(f=>{const st=[...f.steps];st[idx]={...st[idx],subProcId:null};return{...f,steps:st}})}}}>Delete Process</button>
+                    <button style={{...s.bSm,color:t.wn,padding:"6px 10px"}} onClick={async()=>{if(await askConfirm(`Delete process "${linkedProc?.name||"sub-process"}"?`)){rmPr(step.subProcId);setForm(f=>{const st=[...f.steps];st[idx]={...st[idx],subProcId:null};return{...f,steps:st}})}}}>Delete Process</button>
                   </div>
                 </>
               ):(
@@ -526,7 +533,7 @@ export default function App(){
         <div style={{marginLeft:28}}><button style={s.bSm} onClick={()=>setForm(f=>({...f,steps:[...f.steps,{num:f.steps.length+1,action:"",itemId:null,subProcId:null}]}))}>+ Step</button></div>
       </Fld>
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-        {isEdit&&<button style={s.bD} onClick={()=>{if(confirm("Delete?")){rmPr(form.id);setSelPr(null);setModal(null)}}}>Delete</button>}
+        {isEdit&&<button style={s.bD} onClick={async()=>{if(await askConfirm("Delete this process?")){rmPr(form.id);setSelPr(null);setModal(null)}}}>Delete</button>}
         <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
         <button style={s.bP} onClick={()=>{const e=valPr(form);setValE(e);if(Object.keys(e).length)return;
           if(isEdit){
@@ -556,8 +563,39 @@ export default function App(){
 
   // ─── MAIN RENDER ──────────────────────────────────────────────────────────
   const topProcs=(data.processes||[]).filter(p=>!p.parent);
+  const win=getCurrentWindow();
   return(<div style={{fontFamily:"'DM Sans','Helvetica Neue',sans-serif",background:t.bg,color:t.tx,height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-    {toastMsg&&<div style={{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",zIndex:2000,padding:"8px 20px",borderRadius:8,background:toastWarn?(dark?"#3d3520":"#fef6e0"):t.tBg,border:`1px solid ${toastWarn?"#c9a84c":t.tBd}`,color:toastWarn?"#c9a84c":t.ac,fontSize:13,fontWeight:500,boxShadow:"0 8px 30px rgba(0,0,0,0.3)",display:"flex",alignItems:"center",gap:10}}>
+    {/* Custom title bar */}
+    <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none"}}>
+      <div data-tauri-drag-region style={{paddingLeft:12,fontSize:11,color:t.txD,fontWeight:500,letterSpacing:"0.02em",display:"flex",alignItems:"center",gap:6,flex:1}}>
+        <span style={{opacity:0.5}}>◈</span> Apartment Planner{activePath?` — ${data?.name||""}`:isSample?" — Sample":""}
+      </div>
+      <div style={{display:"flex",height:"100%"}}>
+        <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          <svg width="10" height="1" viewBox="0 0 10 1"><line x1="0" y1="0.5" x2="10" y2="0.5" stroke="currentColor" strokeWidth="1"/></svg>
+        </div>
+        <div onClick={()=>win.toggleMaximize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+          {isMaximized?<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="2" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="1"/><polyline points="2,2 2,0 10,0 10,8 8,8" fill="none" stroke="currentColor" strokeWidth="1"/></svg>
+          :<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="0" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1"/></svg>}
+        </div>
+        <div onClick={()=>win.close()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>{e.currentTarget.style.background="#c42b1c";e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=t.txD}}>
+          <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" strokeWidth="1.2"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" strokeWidth="1.2"/></svg>
+        </div>
+      </div>
+    </div>
+
+    {/* Custom confirm modal */}
+    {cfm&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3000}}>
+      <div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:10,padding:"20px 24px",maxWidth:400,width:"90%",boxShadow:"0 16px 50px rgba(0,0,0,0.4)"}}>
+        <div style={{fontSize:14,color:t.tx,marginBottom:16,lineHeight:1.5,whiteSpace:"pre-line"}}>{cfm.msg}</div>
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+          <button style={{...s.bS,padding:"7px 18px"}} onClick={()=>{cfm.resolve(false);setCfm(null)}}>Cancel</button>
+          <button style={{...s.bP,padding:"7px 18px"}} onClick={()=>{cfm.resolve(true);setCfm(null)}}>Ok</button>
+        </div>
+      </div>
+    </div>}
+
+    {toastMsg&&<div style={{position:"fixed",top:48,left:"50%",transform:"translateX(-50%)",zIndex:2000,padding:"8px 20px",borderRadius:8,background:toastWarn?(dark?"#3d3520":"#fef6e0"):t.tBg,border:`1px solid ${toastWarn?"#c9a84c":t.tBd}`,color:toastWarn?"#c9a84c":t.ac,fontSize:13,fontWeight:500,boxShadow:"0 8px 30px rgba(0,0,0,0.3)",display:"flex",alignItems:"center",gap:10}}>
       <span>{toastMsg}</span>
       {toastUndo&&<span onClick={()=>{toastUndo();}} style={{cursor:"pointer",color:t.wn,fontWeight:600,textDecoration:"underline",fontSize:12}}>(undo)</span>}
     </div>}
@@ -569,23 +607,23 @@ export default function App(){
           :<h1 onClick={()=>{setNameVal(data.name);setEditName(true);setTimeout(()=>nameRef.current?.select(),0)}} style={{fontSize:17,fontWeight:700,margin:0,letterSpacing:"-0.02em",cursor:"pointer",borderBottom:`1px dashed ${t.bd}`,paddingBottom:1}} title="Click to rename">{data.name}</h1>}
           <div style={{fontSize:10,color:t.txD,marginTop:2,display:"flex",gap:8,alignItems:"center"}}>
             <span>{data.items.length} items · {data.spaces.length} spaces · {data.processes.length} routines</span>
-            {activePath?<span style={{color:dirty?t.wn:t.ac}}>{dirty?"● unsaved":lastSaved?`✓ ${lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`:""}</span>:<span style={{fontSize:10,color:t.txD,fontStyle:"italic"}}>sample — save to create a file</span>}
+            {activePath?<span style={{color:dirty?t.wn:t.ac}}>{dirty?"● unsaved":lastSaved?`✓ ${lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`:""}</span>:<span style={{fontSize:10,color:t.txD,fontStyle:"italic"}}>{isSample?"sample — save to create a file":"save to create a file"}</span>}
           </div>
         </div>
         <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
           <button onClick={()=>setDark(d=>!d)} style={{...s.bSm,fontSize:13,padding:"4px 8px",lineHeight:1,height:28,width:28,display:"flex",alignItems:"center",justifyContent:"center"}} title={dark?"Light":"Dark"}>{dark?"☼":"☽"}</button>
           <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
           <div style={{position:"relative"}}>
-            <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">◱ Open</button>
+            <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">Open</button>
             {ctxMenu&&<><div onClick={()=>setCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999}}/><div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,background:t.dBg,border:`1px solid ${t.dBd}`,borderRadius:6,padding:4,zIndex:1000,boxShadow:"0 8px 24px rgba(0,0,0,0.3)",minWidth:140}}>
-              <div onClick={()=>{openFile();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.tx,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>◱ Open File…</div>
+              <div onClick={()=>{openFile();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.tx,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>Open file…</div>
               {recentFiles.length>0&&<><div style={{borderTop:`1px solid ${t.bdL}`,margin:"2px 0"}}/>{recentFiles.slice(0,5).map(f=><div key={f.path} onClick={()=>{loadRecent(f.path);setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:11,color:t.txM,cursor:"pointer",borderRadius:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{f.name}</div>)}</>}
               <div style={{borderTop:`1px solid ${t.bdL}`,margin:"2px 0"}}/>
-              <div onClick={()=>{resetDef();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.txD,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>See Sample</div>
+              <div onClick={()=>{resetDef();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.txD,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>See sample</div>
             </div></>}
           </div>
-          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>saveAs(data?.name||"plan")} title="Save As…">◈ Save</button>
-          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">▱ New</button>
+          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>saveAs(data?.name||"plan")} title="Save as">Save</button>
+          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">New</button>
           <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
           <div style={{display:"flex",background:t.bsBg,borderRadius:8,padding:2}}>{[{k:"spatial",l:"Spaces",i:"▣"},{k:"process",l:"Processes",i:"▷"}].map(v=><div key={v.k} onClick={()=>{setView(v.k);setSelIt(null)}} style={{padding:"5px 12px",borderRadius:6,fontSize:12,cursor:"pointer",fontWeight:view===v.k?600:400,background:view===v.k?t.acS:"transparent",color:view===v.k?t.tx:t.txD}}>{v.i} {v.l}</div>)}</div>
         </div>
@@ -596,7 +634,7 @@ export default function App(){
         <div onClick={()=>setTreeFilter(f=>f==="needed"?null:"needed")} style={{cursor:"pointer",userSelect:"none",display:"flex",alignItems:"center",gap:2}}><span style={{color:t.wn,fontSize:treeFilter==="needed"?14:12,lineHeight:1}}>●</span><span style={{color:treeFilter==="needed"?t.tx:t.txD,fontWeight:treeFilter==="needed"?800:400}}>Needed: </span><span style={{color:treeFilter==="needed"?t.tx:undefined,fontWeight:treeFilter==="needed"?800:400}}>{fmtInt(stats.needed)}</span></div>
         {stats.cost>0&&<div><span style={{color:t.txD}}>Estimate: </span><strong style={{color:t.wn}}>${fmt(stats.cost)}</strong></div>}
         <div style={{flex:1}}/>
-        <button style={{...s.bSm,fontSize:11}} onClick={exportShop} title="Export shopping list as Excel">▤ ({shopItems.length})</button>
+        <button style={{...s.bSm,fontSize:11}} onClick={exportShop} title="Export shopping list as Excel">Export List</button>
       </div>
     </div>
 
@@ -630,14 +668,14 @@ export default function App(){
               {canMoveSp(selSp,1)&&<button style={s.bSm} onClick={()=>moveSp(selSp,1)}>↓ Move Down</button>}
               <button style={s.bSm} onClick={()=>openSp(null,selSp)}>+ Sub-Space</button>
               <button style={s.bSm} onClick={()=>openIt(null,selSp)}>+ Item Here</button>
-              {selSp!=="s_apt"&&<button style={{...s.bSm,color:t.wn}} onClick={()=>{const sp=sM[selSp];const lk=gLk(selSp);const msg=lk?`Delete "${sp.name}" and its linked item "${dName(lk)}"? This will also delete all sub-spaces.`:`Delete "${sp.name}"? This will also delete all sub-spaces.`;if(confirm(msg)){const par=sp.parent||"s_apt";rmSp(selSp);setSelSp(par)}}}>Delete</button>}
+              {selSp!=="s_apt"&&<button style={{...s.bSm,color:t.wn}} onClick={async()=>{const sp=sM[selSp];const lk=gLk(selSp);const msg=lk?`Delete "${sp.name}" and its linked item "${dName(lk)}"? This will also delete all sub-spaces.`:`Delete "${sp.name}"? This will also delete all sub-spaces.`;if(await askConfirm(msg)){const par=sp.parent||"s_apt";rmSp(selSp);setSelSp(par)}}}>Delete</button>}
             </div>
           </>}
           {view==="process"&&selPr&&pM[selPr]&&(()=>{const p=pM[selPr];const par=p.parent?pM[p.parent]:null;const ch=gPC(p.id);return<>
             <div style={{fontSize:15,fontWeight:600,marginBottom:3}}>{p.name}</div>
             <div style={{display:"flex",gap:10,fontSize:12,color:t.txD,flexWrap:"wrap"}}>
               {p.frequency&&<span>↻ {p.frequency}</span>}
-              <span onClick={()=>{setView("spatial");setSelSp(p.location)}} style={{color:t.ac,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>◎ {sM[p.location]?.name||""}</span>
+              <span onClick={()=>{setView("spatial");setSelSp(p.location)}} style={{color:t.ac,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>{TI[sM[p.location]?.type]||"◎"} {sM[p.location]?.name||""}</span>
               {par&&<span onClick={()=>setSelPr(par.id)} style={{color:t.pp,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>↑ {par.name}</span>}
             </div>
             {ch.length>0&&<div style={{marginTop:6,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}><span style={{fontSize:10,color:t.txD,letterSpacing:0.5}}>Sub: </span>{ch.map((c,i)=><span key={c.id} style={{display:"inline-flex",alignItems:"center",gap:4}}>{i>0&&<span style={{color:t.txD,fontSize:10}}>→</span>}<span onClick={()=>setSelPr(c.id)} style={{fontSize:11,color:t.pp,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>{c.name}</span></span>)}</div>}
@@ -646,7 +684,7 @@ export default function App(){
               {canMovePr(p.id,-1)&&<button style={s.bSm} onClick={()=>movePr(p.id,-1)}>↑ Move Up</button>}
               {canMovePr(p.id,1)&&<button style={s.bSm} onClick={()=>movePr(p.id,1)}>↓ Move Down</button>}
               <button style={s.bSm} onClick={()=>openPr(null,p.id)}>+ Sub-Process</button>
-              <button style={{...s.bSm,color:t.wn}} onClick={()=>{if(confirm(`Delete "${p.name}"? Sub-processes will become top-level.`)){const par=p.parent;rmPr(p.id);setSelPr(par||null)}}}>Delete</button>
+              <button style={{...s.bSm,color:t.wn}} onClick={async()=>{if(await askConfirm(`Delete "${p.name}"? Sub-processes will become top-level.`)){const par=p.parent;rmPr(p.id);setSelPr(par||null)}}}>Delete</button>
             </div>
             <div style={{marginTop:12}}>{p.steps.map(step=>{
               const item=step.itemId?iM[step.itemId]:null;
