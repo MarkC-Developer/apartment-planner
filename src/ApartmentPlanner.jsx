@@ -76,9 +76,12 @@ export default function App(){
   const[treeFilter,setTreeFilter]=useState(null); // null | "owned" | "needed"
   const nameRef=useRef(null);const undoRef=useRef(null);const toastTimer=useRef(null);
   const[ctxMenu,setCtxMenu]=useState(null); // {x, y} for right-click context menu
-  const[cfm,setCfm]=useState(null); // {msg, resolve} for custom confirm
+  const[cfm,setCfm]=useState(null); // {title, msg, okLabel, resolve} for custom confirm
   const[isMaximized,setIsMaximized]=useState(false);
-  const askConfirm=useCallback(msg=>new Promise(resolve=>setCfm({msg,resolve})),[]);
+  const askConfirm=useCallback((msgOrOpts)=>{
+    const opts=typeof msgOrOpts==="string"?{msg:msgOrOpts}:msgOrOpts;
+    return new Promise(resolve=>setCfm({title:opts.title||null,msg:opts.msg,okLabel:opts.okLabel||"Ok",resolve}));
+  },[]);
   const isSample=!activePath&&data?.name==="My Apartment"; // differentiates sample from new blank
 
   const toast=useCallback((msg,undoFn,warn)=>{
@@ -123,8 +126,8 @@ export default function App(){
     return u;
   },[]);
 
-  // Periodic autosave — only if we have an active file
-  useEffect(()=>{if(!dirty||!data||!activePath)return;const tm=setTimeout(()=>{writePlan(activePath,data).then(u=>setData(u)).catch(()=>{})},5000);return()=>clearTimeout(tm)},[dirty,data,writePlan,activePath]);
+  // Periodic autosave — only if we have an active file, paused during confirm dialogs
+  useEffect(()=>{if(!dirty||!data||!activePath||cfm)return;const tm=setTimeout(()=>{writePlan(activePath,data).then(u=>setData(u)).catch(()=>{})},5000);return()=>clearTimeout(tm)},[dirty,data,writePlan,activePath,cfm]);
 
   // Save As: native Save dialog, writes new file, switches to it
   const saveAs=useCallback(async(suggestedName)=>{
@@ -186,12 +189,15 @@ export default function App(){
   },[]);
 
   const startNew=useCallback(async()=>{
-    if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before starting new?");if(save)await writePlan(activePath,data).catch(()=>{})}
-    if(!await askConfirm("Start a new blank plan?\n\nYour existing files will not be affected."))return;
+    const needsConfirm=dirty&&!isSample;
+    if(needsConfirm){
+      const proceed=await askConfirm({title:"Start a New Plan?",msg:"Your current work is unsaved. If you proceed, you may lose work.",okLabel:"Proceed"});
+      if(!proceed)return;
+    }
     const d=JSON.parse(JSON.stringify(BLANK));setData(d);
     setActivePath(null);setDirty(false);setLastSaved(null);
     setSelSp("s_apt");setSelPr(null);setSelIt(null);setExp({});toast("New blank — save to create a file")
-  },[activePath,dirty,data,writePlan,toast,askConfirm]);
+  },[dirty,isSample,activePath,data,writePlan,toast,askConfirm]);
 
   const resetDef=useCallback(async()=>{
     if(activePath&&dirty&&data){const save=await askConfirm("You have unsaved changes. Save before switching?");if(save)await writePlan(activePath,data).catch(()=>{})}
@@ -567,8 +573,8 @@ export default function App(){
   return(<div style={{fontFamily:"'DM Sans','Helvetica Neue',sans-serif",background:t.bg,color:t.tx,height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
     {/* Custom title bar */}
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none"}}>
-      <div data-tauri-drag-region style={{paddingLeft:12,fontSize:11,color:t.txD,fontWeight:500,letterSpacing:"0.02em",display:"flex",alignItems:"center",gap:6,flex:1}}>
-        <span style={{opacity:0.5}}>◈</span> Apartment Planner{activePath?` — ${data?.name||""}`:isSample?" — Sample":""}
+      <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
+        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner
       </div>
       <div style={{display:"flex",height:"100%"}}>
         <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
@@ -587,10 +593,11 @@ export default function App(){
     {/* Custom confirm modal */}
     {cfm&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3000}}>
       <div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:10,padding:"20px 24px",maxWidth:400,width:"90%",boxShadow:"0 16px 50px rgba(0,0,0,0.4)"}}>
-        <div style={{fontSize:14,color:t.tx,marginBottom:16,lineHeight:1.5,whiteSpace:"pre-line"}}>{cfm.msg}</div>
+        {cfm.title&&<div style={{fontSize:15,fontWeight:700,color:t.tx,marginBottom:8}}>{cfm.title}</div>}
+        <div style={{fontSize:13,color:t.txM,marginBottom:18,lineHeight:1.5,whiteSpace:"pre-line"}}>{cfm.msg}</div>
         <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
-          <button style={{...s.bS,padding:"7px 18px"}} onClick={()=>{cfm.resolve(false);setCfm(null)}}>Cancel</button>
-          <button style={{...s.bP,padding:"7px 18px"}} onClick={()=>{cfm.resolve(true);setCfm(null)}}>Ok</button>
+          <button style={{...s.bS,padding:"7px 0",minWidth:100,textAlign:"center"}} onClick={()=>{cfm.resolve(false);setCfm(null)}}>Cancel</button>
+          <button style={{...s.bP,padding:"7px 0",minWidth:100,textAlign:"center"}} onClick={()=>{cfm.resolve(true);setCfm(null)}}>{cfm.okLabel}</button>
         </div>
       </div>
     </div>}
@@ -611,8 +618,7 @@ export default function App(){
           </div>
         </div>
         <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
-          <button onClick={()=>setDark(d=>!d)} style={{...s.bSm,fontSize:13,padding:"4px 8px",lineHeight:1,height:28,width:28,display:"flex",alignItems:"center",justifyContent:"center"}} title={dark?"Light":"Dark"}>{dark?"☼":"☽"}</button>
-          <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
+          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">New</button>
           <div style={{position:"relative"}}>
             <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">Open</button>
             {ctxMenu&&<><div onClick={()=>setCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999}}/><div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,background:t.dBg,border:`1px solid ${t.dBd}`,borderRadius:6,padding:4,zIndex:1000,boxShadow:"0 8px 24px rgba(0,0,0,0.3)",minWidth:140}}>
@@ -623,7 +629,8 @@ export default function App(){
             </div></>}
           </div>
           <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>saveAs(data?.name||"plan")} title="Save as">Save</button>
-          <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">New</button>
+          <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
+          <button onClick={()=>setDark(d=>!d)} style={{...s.bSm,fontSize:13,padding:"4px 8px",lineHeight:1,height:28,width:28,display:"flex",alignItems:"center",justifyContent:"center"}} title={dark?"Light":"Dark"}>{dark?"☼":"☽"}</button>
           <div style={{width:1,height:20,background:t.bd,margin:"0 2px"}}/>
           <div style={{display:"flex",background:t.bsBg,borderRadius:8,padding:2}}>{[{k:"spatial",l:"Spaces",i:"▣"},{k:"process",l:"Processes",i:"▷"}].map(v=><div key={v.k} onClick={()=>{setView(v.k);setSelIt(null)}} style={{padding:"5px 12px",borderRadius:6,fontSize:12,cursor:"pointer",fontWeight:view===v.k?600:400,background:view===v.k?t.acS:"transparent",color:view===v.k?t.tx:t.txD}}>{v.i} {v.l}</div>)}</div>
         </div>
