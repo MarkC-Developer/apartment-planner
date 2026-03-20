@@ -3,9 +3,9 @@
 A local-first spatial and process planning tool. Your data lives as `.json` files on your own filesystem — no cloud, no localStorage, no browser dependency.
 
 ## Installation
-- **Installer**: Download latest release installer from Releases on the sidebar:
-  - Windows: Recommended to use the msi. Will show some warnings as unsigned (not something I would pay for)
-  - macOS: Use the .dmg file.
+**Installer**: Download latest release installer from Releases on the sidebar:
+- Windows: Recommended to use the msi. Will show some warnings as unsigned (not something I would pay for)
+- macOS: Use the .dmg file.
 
 ## How Data Storage Works
 
