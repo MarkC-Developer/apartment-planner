@@ -10,6 +10,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
+const VERSION="v1.2.2";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -20,14 +21,22 @@ const uid=p=>`${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice
 const fmt=n=>{if(n==null||isNaN(n))return"0";const v=Number(n);return v%1===0?v.toLocaleString("en-US"):v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})};
 const fmtInt=n=>{if(n==null||isNaN(n))return"0";return Number(n).toLocaleString("en-US")};
 
-function migrate(d){if(!d?.items)return d;d.items.forEach(i=>{if(i.brand===undefined)i.brand="";if(i.model===undefined)i.model="";if(i.url===undefined)i.url="";if(i.qtyNeeded===undefined){i.qtyNeeded=1;i.qtyOwned=i.owned?1:0}if(i.modelInTitle===undefined)i.modelInTitle=false;delete i.owned});
+function migrate(d){if(!d?.items)return d;d.items.forEach(i=>{
+  if(i.brand===undefined)i.brand="";if(i.model===undefined)i.model="";if(i.url===undefined)i.url="";
+  if(i.qtyNeeded===undefined){i.qtyNeeded=1;i.qtyOwned=i.owned?1:0}
+  if(i.modelInTitle===undefined)i.modelInTitle=false;
+  if(i.configuration===undefined)i.configuration="";
+  if(i.configInTitle===undefined)i.configInTitle=false;
+  // Migrate multi-location to single
+  if(Array.isArray(i.spaces)&&i.spaces.length>1)i.spaces=[i.spaces[0]];
+  delete i.owned});
   const fMap={"2x/week":"2x per Week","3x/week":"3x per Week","4x/week":"4x per Week","Bi-weekly":"Bi-Weekly","As needed":"As Needed"};
   d.processes?.forEach(p=>{if(p.parent===undefined)p.parent=null;if(fMap[p.frequency])p.frequency=fMap[p.frequency];p.steps?.forEach(st=>{if(st.duration===undefined)st.duration="";if(st.subProcId===undefined)st.subProcId=null})});return d}
 function isOw(i){return(i.qtyOwned||0)>=(i.qtyNeeded||1)}
 function sfall(i){return Math.max(0,(i.qtyNeeded||1)-(i.qtyOwned||0))}
-function dName(i){const p=[i.brand];if(i.modelInTitle&&i.model)p.push(i.model);p.push(i.name);return p.filter(Boolean).join(" ")}
+function dName(i){const p=[i.brand];if(i.modelInTitle&&i.model)p.push(i.model);p.push(i.name);const base=p.filter(Boolean).join(" ");return i.configInTitle&&i.configuration?`${base} (${i.configuration})`:base}
 
-const mk=(id,n,br,mo,cat,qN,qO,cost,dim,url,notes,sp,ps,ias)=>({id,name:n,brand:br||"",model:mo||"",category:cat,qtyNeeded:qN,qtyOwned:qO,cost,dimensions:dim||"",url:url||"",notes:notes||"",spaces:sp,processSteps:ps||[],isAlsoSpace:ias||"",modelInTitle:false});
+const mk=(id,n,br,mo,cat,qN,qO,cost,dim,url,notes,sp,ps,ias,cfg)=>({id,name:n,brand:br||"",model:mo||"",configuration:cfg||"",category:cat,qtyNeeded:qN,qtyOwned:qO,cost,dimensions:dim||"",url:url||"",notes:notes||"",spaces:Array.isArray(sp)?sp:[sp||"s_apt"],processSteps:ps||[],isAlsoSpace:ias||"",modelInTitle:false,configInTitle:false});
 
 // ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
 const BLANK={name:"New Apartment",lastSaved:null,items:[],spaces:[{id:"s_apt",name:"Apartment",type:"unit",parent:null,dimensions:"",notes:"",linkedItemId:null}],processes:[]};
@@ -46,7 +55,7 @@ function ComboBox({t,options,value,onChange,placeholder,onAdd,addLabel,s,extraTo
 }
 
 // ─── UI BITS ──────────────────────────────────────────────────────────────────
-function Mod({t,title,onClose,children,width=500}){return(<div onMouseDown={e=>{if(e.target===e.currentTarget)onClose()}} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}><div onMouseDown={e=>e.stopPropagation()} style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:12,width:"100%",maxWidth:width,maxHeight:"85vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}><div style={{padding:"16px 20px",borderBottom:`1px solid ${t.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:15,fontWeight:600,color:t.tx}}>{title}</span><span onClick={onClose} style={{cursor:"pointer",color:t.txD,fontSize:18}}>✕</span></div><div style={{padding:"16px 20px",overflowY:"auto",flex:1}}>{children}</div></div></div>)}
+function Mod({t,title,onClose,children,width=500}){return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}><div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:12,width:"100%",maxWidth:width,maxHeight:"85vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}><div style={{padding:"16px 20px",borderBottom:`1px solid ${t.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:15,fontWeight:600,color:t.tx}}>{title}</span><span onClick={onClose} style={{cursor:"pointer",color:t.txD,fontSize:18}}>✕</span></div><div style={{padding:"16px 20px",overflowY:"auto",flex:1}}>{children}</div></div></div>)}
 function Fld({t,label,children,error}){return(<div style={{marginBottom:14}}><label style={{fontSize:11,color:error?t.wn:t.txD,textTransform:"uppercase",letterSpacing:1,display:"block",marginBottom:5}}>{label}{error&&<span style={{fontStyle:"italic",textTransform:"none",letterSpacing:0}}> — {error}</span>}</label>{children}</div>)}
 
 const mkS=t=>({
@@ -279,7 +288,7 @@ export default function App(){
       result.forEach((s,i)=>s.num=i+1);parent.steps=result;
     }}})},[upd]);
 
-  const quickAddIt=useCallback(n=>{const nid=uid("i");addIt({id:nid,name:n,brand:"",model:"",category:"",qtyNeeded:1,qtyOwned:0,cost:null,dimensions:"",url:"",notes:"",spaces:["s_apt"],processSteps:[],isAlsoSpace:"",modelInTitle:false});toast(`Created "${n}"`);return nid},[addIt,toast]);
+  const quickAddIt=useCallback(n=>{const nid=uid("i");addIt({id:nid,name:n,brand:"",model:"",configuration:"",category:"",qtyNeeded:1,qtyOwned:0,cost:null,dimensions:"",url:"",notes:"",spaces:["s_apt"],processSteps:[],isAlsoSpace:"",modelInTitle:false,configInTitle:false});toast(`Created "${n}"`);return nid},[addIt,toast]);
   const quickAddSp=useCallback(n=>{const nid=uid("s");addSp({id:nid,name:n,type:"container",parent:"s_apt",dimensions:"",notes:"",linkedItemId:null});toast(`Created "${n}"`);return nid},[addSp,toast]);
   const quickAddPr=useCallback((n,parentId)=>{const nid=uid("p");addPr({id:nid,name:n,frequency:"",location:"s_apt",parent:parentId||null,steps:[{num:1,action:"",itemId:null,subProcId:null}]});toast(`Created sub-process "${n}"`);return nid},[addPr,toast]);
 
@@ -290,12 +299,15 @@ export default function App(){
   const gPrPt=useCallback(pid=>{const r=[];let c=pid;while(c&&pM[c]){r.unshift(pM[c].name);c=pM[c].parent}return r.join(" → ")},[pM]);
 
   // Filtered + stats
-  const filtered=useMemo(()=>{let items;if(view==="spatial")items=gRec(selSp);else{if(!selPr||!pM[selPr])return[];items=pM[selPr].steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean)}if(search){const q=search.toLowerCase();items=items.filter(i=>(i.name+i.category+i.brand+i.model+i.notes).toLowerCase().includes(q))}if(filter==="owned")items=items.filter(isOw);if(filter==="needed")items=items.filter(i=>!isOw(i));return[...new Map(items.map(i=>[i.id,i])).values()]},[view,selSp,selPr,search,filter,gRec,pM,iM]);
-  const stats=useMemo(()=>{const all=view==="spatial"?gRec(selSp):filtered;const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0)}},[view,selSp,filtered,gRec]);
+  const filtered=useMemo(()=>{let items;if(view==="spatial")items=gRec(selSp);else{if(!selPr||!pM[selPr])return[];items=pM[selPr].steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean)}if(search){const q=search.toLowerCase();items=items.filter(i=>(i.name+i.category+i.brand+i.model+(i.configuration||"")+i.notes).toLowerCase().includes(q))}if(filter==="owned")items=items.filter(isOw);if(filter==="needed")items=items.filter(i=>!isOw(i));const unique=[...new Map(items.map(i=>[i.id,i])).values()];
+    // Sort: sub-space items first (in space order), then non-sub-space alphabetically
+    const spOrder=(data?.spaces||[]).map(x=>x.id);
+    unique.sort((a,b)=>{const aIsSub=!!a.isAlsoSpace;const bIsSub=!!b.isAlsoSpace;if(aIsSub&&!bIsSub)return-1;if(!aIsSub&&bIsSub)return 1;if(aIsSub&&bIsSub)return spOrder.indexOf(a.isAlsoSpace)-spOrder.indexOf(b.isAlsoSpace);return dName(a).localeCompare(dName(b))});return unique},[view,selSp,selPr,search,filter,gRec,pM,iM,data]);
+  const stats=useMemo(()=>{const all=view==="spatial"?gRec(selSp):filtered;const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),ownedCost:u.reduce((s,i)=>s+Math.min(i.qtyOwned||0,i.qtyNeeded||1)*(i.cost||0),0)}},[view,selSp,filtered,gRec]);
   const shopItems=useMemo(()=>(data?.items||[]).filter(i=>sfall(i)>0),[data]);
   const shopTotal=useMemo(()=>shopItems.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),[shopItems]);
 
-  const exportShop=useCallback(async()=>{const rows=shopItems.map(i=>({Item:dName(i),Model:i.model||"",Category:i.category||"","Qty Needed":sfall(i),"Cost/Item":i.cost||"","Line Total":sfall(i)*(i.cost||0),URL:i.url||"",Notes:i.notes||""}));rows.push({Item:"",Model:"",Category:"","Qty Needed":"","Cost/Item":"TOTAL:","Line Total":shopTotal,URL:"",Notes:""});const ws=XLSX.utils.json_to_sheet(rows);rows.forEach((r,i)=>{if(r.URL){const cell=XLSX.utils.encode_cell({r:i+1,c:6});if(ws[cell])ws[cell].l={Target:r.URL}}});ws["!cols"]=[{wch:35},{wch:20},{wch:14},{wch:10},{wch:10},{wch:12},{wch:40},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Shopping List");
+  const exportShop=useCallback(async()=>{const rows=shopItems.map(i=>({Item:dName(i),Model:i.model||"",Configuration:i.configuration||"",Category:i.category||"","Qty Needed":sfall(i),"Cost/Item":i.cost||"","Line Total":sfall(i)*(i.cost||0),URL:i.url||"",Notes:i.notes||""}));rows.push({Item:"",Model:"",Configuration:"",Category:"","Qty Needed":"","Cost/Item":"TOTAL:","Line Total":shopTotal,URL:"",Notes:""});const ws=XLSX.utils.json_to_sheet(rows);rows.forEach((r,i)=>{if(r.URL){const cell=XLSX.utils.encode_cell({r:i+1,c:7});if(ws[cell])ws[cell].l={Target:r.URL}}});ws["!cols"]=[{wch:35},{wch:20},{wch:20},{wch:14},{wch:10},{wch:10},{wch:12},{wch:40},{wch:30}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Shopping List");
     const planLabel=(data?.name||"Plan").replace(/[<>:"/\\|?*]/g,"");
     const path=await saveDialog({defaultPath:lastDir?`${lastDir}/Shopping List - ${planLabel}.xlsx`:`Shopping List - ${planLabel}.xlsx`,filters:[{name:"Excel",extensions:["xlsx"]}]});
     if(!path)return;
@@ -310,7 +322,7 @@ export default function App(){
   const valPr=f=>{const e={};if(!f.name?.trim())e.name="Required";if(!f.steps?.length)e.steps="≥1";else if(f.steps.some(x=>!x.action?.trim()))e.steps="Steps need text";return e};
 
   // Modal openers
-  const openIt=useCallback((item=null,defSp=null)=>{setValE({});setModal({type:"item",isEdit:!!item,form:item?{...item,cost:item.cost??""}:{name:"",brand:"",model:"",category:"",qtyNeeded:1,qtyOwned:0,cost:"",dimensions:"",url:"",notes:"",spaces:defSp?[defSp]:[],processSteps:[],isAlsoSpace:"",modelInTitle:false},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
+  const openIt=useCallback((item=null,defSp=null)=>{setValE({});setModal({type:"item",isEdit:!!item,form:item?{...item,cost:item.cost??"",configuration:item.configuration||"",configInTitle:item.configInTitle||false}:{name:"",brand:"",model:"",configuration:"",category:"",qtyNeeded:1,qtyOwned:0,cost:"",dimensions:"",url:"",notes:"",spaces:defSp?[defSp]:[],processSteps:[],isAlsoSpace:"",modelInTitle:false,configInTitle:false},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
   const openSp=useCallback((sp=null,defP=null)=>{setValE({});const par=defP||"s_apt";const parType=sM[par]?.type;const defType=parType==="unit"?"room":parType==="room"?"furniture":"container";setModal({type:"space",isEdit:!!sp,form:sp?{...sp}:{name:"",type:defType,parent:par,dimensions:"",notes:"",linkedItemId:null},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[sM]);
   const openPr=useCallback((proc=null,defPar=null)=>{setValE({});setModal({type:"process",isEdit:!!proc,form:proc?JSON.parse(JSON.stringify(proc)):{name:"",frequency:"",location:"s_apt",parent:defPar||null,steps:[{num:1,action:"",itemId:null,subProcId:null}]},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
   const dupIt=useCallback(item=>{const nid=uid("i");const dup={...JSON.parse(JSON.stringify(item)),id:nid,name:item.name+" (copy)"};addIt(dup);setSelIt(nid);toast(`Duplicated "${item.name}"`);openIt(dup)},[addIt,toast,openIt]);
@@ -389,10 +401,11 @@ export default function App(){
             </span>}
           </div>
           {item.model&&!item.modelInTitle&&<div style={{fontSize:11,color:t.txD,marginTop:1}}>{item.model}</div>}
+          {item.configuration&&!item.configInTitle&&<div style={{fontSize:11,color:t.txD,marginTop:1}}>{item.configuration}</div>}
           <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap",alignItems:"center"}}>
             {lsp.length>0&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.ppBg,color:t.pp}}>Sub-Space</span>}
-            {!own&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.wnS,color:t.wn}}>{sh<=1?"Needed":`Need ${sh}`}</span>}
             {item.category&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:`${cc}22`,color:cc,fontWeight:500}}>{item.category}</span>}
+            {!own&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.wnS,color:t.wn}}>{sh<=1?"Needed":`Need ${sh}`}</span>}
           </div>
         </div>
       </div>
@@ -415,17 +428,36 @@ export default function App(){
 
   // ─── MODALS ───────────────────────────────────────────────────────────────
   const renderItemModal=()=>{const{isEdit,form,setForm}=modal;const e=valE;
+    const handleSubSpaceToggle=checked=>{
+      if(checked){
+        const parentId=(form.spaces||[])[0]||"s_apt";
+        const parentType=sM[parentId]?.type||"unit";
+        const defType=parentType==="unit"?"room":parentType==="room"?"furniture":"container";
+        const nid=uid("s");addSp({id:nid,name:form.name||"Sub-space",type:defType,parent:parentId,dimensions:"",notes:"",linkedItemId:null});
+        setForm({isAlsoSpace:nid});
+      } else {
+        if(form.isAlsoSpace){const sp=sM[form.isAlsoSpace];if(sp)rmSp(form.isAlsoSpace)}
+        setForm({isAlsoSpace:""});
+      }
+    };
     return(<Mod t={t} title={isEdit?"Edit Item":"Add Item"} onClose={()=>setModal(null)} width={540}>
       <Fld t={t} label="Name *" error={e.name}><input style={e.name?s.inputE:s.input} value={form.name} onChange={ev=>setForm({name:ev.target.value})} placeholder="e.g. Standing Desk"/></Fld>
       <div style={{display:"flex",gap:10}}>
         <div style={{flex:1}}><Fld t={t} label="Brand"><input style={s.input} value={form.brand||""} onChange={ev=>setForm({brand:ev.target.value})}/></Fld></div>
         <div style={{flex:1}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}>
-            <label style={{fontSize:11,color:t.txD,textTransform:"uppercase",letterSpacing:1}}>Model / Configuration</label>
+            <label style={{fontSize:11,color:t.txD,textTransform:"uppercase",letterSpacing:1}}>Model</label>
             <label style={{fontSize:9,color:t.txD,display:"flex",alignItems:"center",gap:3,cursor:"pointer",whiteSpace:"nowrap"}}>(IN TITLE) <input type="checkbox" checked={form.modelInTitle||false} onChange={ev=>setForm({modelInTitle:ev.target.checked})} style={{accentColor:t.ac,margin:0}}/></label>
           </div>
           <input style={s.input} value={form.model||""} onChange={ev=>setForm({model:ev.target.value})}/>
         </div>
+      </div>
+      <div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}>
+          <label style={{fontSize:11,color:t.txD,textTransform:"uppercase",letterSpacing:1}}>Configuration</label>
+          <label style={{fontSize:9,color:t.txD,display:"flex",alignItems:"center",gap:3,cursor:"pointer",whiteSpace:"nowrap"}}>(IN TITLE) <input type="checkbox" checked={form.configInTitle||false} onChange={ev=>setForm({configInTitle:ev.target.checked})} style={{accentColor:t.ac,margin:0}}/></label>
+        </div>
+        <input style={s.input} value={form.configuration||""} onChange={ev=>setForm({configuration:ev.target.value})}/>
       </div>
       <div style={{display:"flex",gap:10}}>
         <div style={{flex:1}}><Fld t={t} label="Category"><input style={s.input} value={form.category} onChange={ev=>setForm({category:ev.target.value})} list="cats"/><datalist id="cats">{[...new Set(data.items.map(i=>i.category))].filter(Boolean).sort().map(c=><option key={c} value={c}/>)}</datalist></Fld></div>
@@ -436,20 +468,13 @@ export default function App(){
         <div style={{flex:1}}><Fld t={t} label="Qty Owned" error={e.qtyOwned}><input style={e.qtyOwned?s.inputE:s.input} type="number" min="0" value={form.qtyOwned} onChange={ev=>setForm({qtyOwned:ev.target.value===""?"":Number(ev.target.value)})}/></Fld></div>
         <div style={{flex:1}}><Fld t={t} label="Cost (per item)" error={e.cost}><div style={{position:"relative"}}><span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:t.txD,fontSize:13,pointerEvents:"none"}}>$</span><input style={{...s.input,paddingLeft:24}} value={form.cost} onChange={ev=>{const v=ev.target.value.replace(/[^\d.]/g,"");setForm({cost:v})}} placeholder="0.00"/></div></Fld></div>
       </div>
-      <Fld t={t} label={form.isAlsoSpace?"Location (single — this item is a container)":"Location(s)"}>
-        <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:6}}>{(form.spaces||[]).map(sid=><span key={sid} style={{fontSize:11,padding:"3px 8px",borderRadius:6,background:t.acS,color:t.ac,display:"flex",alignItems:"center",gap:4}}>{sM[sid]?.name||sid}<span onClick={()=>setForm(f=>({...f,spaces:f.spaces.filter(x=>x!==sid)}))} style={{cursor:"pointer",opacity:0.6,fontSize:13}}>×</span></span>)}</div>
-        {(!form.isAlsoSpace||(form.spaces||[]).length===0)&&<ComboBox t={t} s={s} options={spOpts} value={null} placeholder="Search or add location…" onChange={v=>{if(v){if(form.isAlsoSpace)setForm(f=>({...f,spaces:[v]}));else if(!(form.spaces||[]).includes(v))setForm(f=>({...f,spaces:[...f.spaces,v]}))}}} onAdd={n=>{const nid=quickAddSp(n);if(form.isAlsoSpace)setForm(f=>({...f,spaces:[nid]}));else setForm(f=>({...f,spaces:[...f.spaces,nid]}))}} addLabel="Create space"/>}
+      <Fld t={t} label="Location">
+        <ComboBox t={t} s={s} options={spOpts} value={(form.spaces||[])[0]||null} placeholder="Select location…" onChange={v=>setForm({spaces:v?[v]:[]})} onAdd={n=>{const nid=quickAddSp(n);setForm({spaces:[nid]})}} addLabel="Create space"/>
       </Fld>
-      <Fld t={t} label="Also a spatial container?">
-        <ComboBox t={t} s={s} options={spOpts} value={form.isAlsoSpace||null} placeholder="Search space…" onChange={v=>{setForm(f=>{const upd={isAlsoSpace:v||""};if(v&&f.spaces.length>1)upd.spaces=[f.spaces[0]];return{...f,...upd}})}} onAdd={n=>{
-          // Create space under the item's first location with smart type
-          const parentId=(form.spaces||[])[0]||"s_apt";
-          const parentType=sM[parentId]?.type||"unit";
-          const defType=parentType==="unit"?"room":parentType==="room"?"furniture":"container";
-          const nid=uid("s");addSp({id:nid,name:n,type:defType,parent:parentId,dimensions:"",notes:"",linkedItemId:null});toast(`Created "${n}"`);
-          setForm(f=>{const upd={isAlsoSpace:nid};if(f.spaces.length>1)upd.spaces=[f.spaces[0]];return{...f,...upd}})
-        }} addLabel="Create space"/>
-      </Fld>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+        <input type="checkbox" id="subspace-chk" checked={!!form.isAlsoSpace} onChange={ev=>handleSubSpaceToggle(ev.target.checked)} style={{accentColor:t.ac,margin:0}}/>
+        <label htmlFor="subspace-chk" style={{fontSize:12,color:t.txM,cursor:"pointer"}}>Add as a sub-space within the current location</label>
+      </div>
       <Fld t={t} label="URL"><div style={{display:"flex",gap:0}}><input style={{...s.input,borderTopRightRadius:0,borderBottomRightRadius:0}} value={form.url||""} onChange={ev=>setForm({url:ev.target.value})} placeholder="https://…"/><button onClick={()=>{if(form.url)shellOpen(form.url)}} disabled={!form.url} style={{...s.bSm,borderRadius:0,borderTopRightRadius:6,borderBottomRightRadius:6,padding:"8px 10px",fontSize:13,opacity:form.url?1:0.3,borderLeft:"none"}} title="Open">↗</button></div></Fld>
       <Fld t={t} label="Notes"><textarea style={{...s.input,minHeight:50,resize:"vertical"}} value={form.notes} onChange={ev=>setForm({notes:ev.target.value})}/></Fld>
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
@@ -457,11 +482,11 @@ export default function App(){
         <button style={s.bP} onClick={()=>{const e=valIt(form);setValE(e);if(Object.keys(e).length)return;const cost=form.cost===""||form.cost==null?null:Math.max(0,Number(form.cost));const qN=Math.max(1,Number(form.qtyNeeded)||1);const qO=Math.min(Math.max(0,Number(form.qtyOwned)||0),qN);
           if(isEdit){
             edIt(form.id,{...form,cost,qtyNeeded:qN,qtyOwned:qO});
-            if(form.isAlsoSpace){edSp(form.isAlsoSpace,{linkedItemId:form.id,dimensions:form.dimensions||""})}
+            if(form.isAlsoSpace){edSp(form.isAlsoSpace,{linkedItemId:form.id,dimensions:form.dimensions||"",name:form.name})}
             else{data.spaces.filter(x=>x.linkedItemId===form.id).forEach(x=>edSp(x.id,{linkedItemId:null}))}
           }else{
             const nid=uid("i");addIt({...form,id:nid,cost,qtyNeeded:qN,qtyOwned:qO,processSteps:[]});
-            if(form.isAlsoSpace)edSp(form.isAlsoSpace,{linkedItemId:nid,dimensions:form.dimensions||""});
+            if(form.isAlsoSpace)edSp(form.isAlsoSpace,{linkedItemId:nid,dimensions:form.dimensions||"",name:form.name});
           }
           setModal(null)}}>{isEdit?"Save":"Add Item"}</button>
       </div>
@@ -479,7 +504,7 @@ export default function App(){
       {!isRoot&&<Fld t={t} label="Linked Item"><select style={s.sel} value={form.linkedItemId||""} onChange={ev=>setForm({linkedItemId:ev.target.value||null})}><option value="">None</option>{itemsLink.map(i=><option key={i.id} value={i.id}>{dName(i)}</option>)}</select></Fld>}
       <Fld t={t} label="Notes"><textarea style={{...s.input,minHeight:40,resize:"vertical"}} value={form.notes} onChange={ev=>setForm({notes:ev.target.value})}/></Fld>
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-        {isEdit&&form.id!=="s_apt"&&<button style={s.bD} onClick={async()=>{if(await askConfirm(`Delete "${form.name}"?`)){rmSp(form.id);setSelSp(form.parent||"s_apt");setModal(null)}}}>Delete</button>}
+        {isEdit&&form.id!=="s_apt"&&<button style={s.bD} onClick={async()=>{const lk=gLk(form.id);const msg=lk?`Delete "${form.name}" and its linked item "${dName(lk)}"? This will also delete all sub-spaces.`:`Delete "${form.name}"? This will also delete all sub-spaces.`;if(await askConfirm(msg)){rmSp(form.id);setSelSp(form.parent||"s_apt");setModal(null)}}}>Delete</button>}
         <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
         <button style={s.bP} onClick={()=>{const e=valSp(form);setValE(e);if(Object.keys(e).length)return;const saveForm=isRoot?{...form,type:"unit",linkedItemId:null}:form;if(isEdit){edSp(form.id,saveForm);if(!isRoot&&saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:form.id,dimensions:saveForm.dimensions||""})}}else{const ns={...saveForm,id:uid("s")};addSp(ns);if(saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:ns.id,dimensions:saveForm.dimensions||""})}setSelSp(ns.id)}setModal(null)}}>{isRoot?"Save":isEdit?"Save":"Add Space"}</button>
       </div>
@@ -574,7 +599,7 @@ export default function App(){
     {/* Custom title bar */}
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none"}}>
       <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
-        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner
+        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}
       </div>
       <div style={{display:"flex",height:"100%"}}>
         <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
@@ -614,7 +639,7 @@ export default function App(){
           :<h1 onClick={()=>{setNameVal(data.name);setEditName(true);setTimeout(()=>nameRef.current?.select(),0)}} style={{fontSize:17,fontWeight:700,margin:0,letterSpacing:"-0.02em",cursor:"pointer",borderBottom:`1px dashed ${t.bd}`,paddingBottom:1}} title="Click to rename">{data.name}</h1>}
           <div style={{fontSize:10,color:t.txD,marginTop:2,display:"flex",gap:8,alignItems:"center"}}>
             <span>{data.items.length} items · {data.spaces.length} spaces · {data.processes.length} routines</span>
-            {activePath?<span style={{color:dirty?t.wn:t.ac}}>{dirty?"● unsaved":lastSaved?`✓ ${lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})} auto-saved`:""}</span>:<span style={{fontSize:10,color:t.txD,fontStyle:"italic"}}>{isSample?"sample — save to create a file":"save to create a file"}</span>}
+            {activePath?<span style={{color:dirty?t.wn:t.ac}}>{dirty?"● unsaved":lastSaved?`✓ ${lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}).toLowerCase()} auto-saved`:""}</span>:<span style={{fontSize:10,color:t.txD,fontStyle:"italic"}}>{isSample?"sample — save to create a file":"save to create a file"}</span>}
           </div>
         </div>
         <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
@@ -639,7 +664,7 @@ export default function App(){
         <div><span style={{color:t.txD}}>Items: </span><strong>{fmtInt(stats.total)}</strong></div>
         <div onClick={()=>setTreeFilter(f=>f==="owned"?null:"owned")} style={{cursor:"pointer",userSelect:"none",display:"flex",alignItems:"center",gap:2}}><span style={{color:t.ac,fontSize:treeFilter==="owned"?14:12,lineHeight:1}}>●</span><span style={{color:treeFilter==="owned"?t.tx:t.txD,fontWeight:treeFilter==="owned"?800:400}}>Owned: </span><span style={{color:treeFilter==="owned"?t.tx:undefined,fontWeight:treeFilter==="owned"?800:400}}>{fmtInt(stats.owned)}</span></div>
         <div onClick={()=>setTreeFilter(f=>f==="needed"?null:"needed")} style={{cursor:"pointer",userSelect:"none",display:"flex",alignItems:"center",gap:2}}><span style={{color:t.wn,fontSize:treeFilter==="needed"?14:12,lineHeight:1}}>●</span><span style={{color:treeFilter==="needed"?t.tx:t.txD,fontWeight:treeFilter==="needed"?800:400}}>Needed: </span><span style={{color:treeFilter==="needed"?t.tx:undefined,fontWeight:treeFilter==="needed"?800:400}}>{fmtInt(stats.needed)}</span></div>
-        {stats.cost>0&&<div><span style={{color:t.txD}}>Estimate: </span><strong style={{color:t.wn}}>${fmt(stats.cost)}</strong></div>}
+        {stats.cost>0&&<div style={{position:"relative",cursor:"default"}} title={`Needed: $${fmt(stats.cost)}\nOwned: $${fmt(stats.ownedCost)}`}><span style={{color:t.txD}}>Outstanding: </span><strong style={{color:t.wn}}>${fmt(stats.cost)}</strong></div>}
         <div style={{flex:1}}/>
         <button style={{...s.bSm,fontSize:11}} onClick={exportShop} title="Export shopping list as Excel">Export List</button>
       </div>
@@ -670,12 +695,11 @@ export default function App(){
               {(()=>{const lk=gLk(selSp);if(!lk)return null;const o=isOw(lk);return<span onClick={()=>openIt(lk)} style={{fontSize:10,padding:"2px 8px",borderRadius:8,background:o?t.acS:t.wnS,color:o?t.ac:t.wn,cursor:"pointer"}} title="Click to edit item">Item: {dName(lk)}{!o&&lk.cost?` ($${fmt(lk.cost)})`:""}</span>})()}
             </div>
             <div style={{display:"flex",gap:6,marginTop:8}}>
+              <button style={s.bSm} onClick={()=>openIt(null,selSp)}>+ Item Here</button>
+              <button style={s.bSm} onClick={()=>openSp(null,selSp)}>+ Sub-Space</button>
               <button style={s.bSm} onClick={()=>openSp(sM[selSp])}>Edit Space</button>
               {canMoveSp(selSp,-1)&&<button style={s.bSm} onClick={()=>moveSp(selSp,-1)}>↑ Move Up</button>}
               {canMoveSp(selSp,1)&&<button style={s.bSm} onClick={()=>moveSp(selSp,1)}>↓ Move Down</button>}
-              <button style={s.bSm} onClick={()=>openSp(null,selSp)}>+ Sub-Space</button>
-              <button style={s.bSm} onClick={()=>openIt(null,selSp)}>+ Item Here</button>
-              {selSp!=="s_apt"&&<button style={{...s.bSm,color:t.wn}} onClick={async()=>{const sp=sM[selSp];const lk=gLk(selSp);const msg=lk?`Delete "${sp.name}" and its linked item "${dName(lk)}"? This will also delete all sub-spaces.`:`Delete "${sp.name}"? This will also delete all sub-spaces.`;if(await askConfirm(msg)){const par=sp.parent||"s_apt";rmSp(selSp);setSelSp(par)}}}>Delete</button>}
             </div>
           </>}
           {view==="process"&&selPr&&pM[selPr]&&(()=>{const p=pM[selPr];const par=p.parent?pM[p.parent]:null;const ch=gPC(p.id);return<>
