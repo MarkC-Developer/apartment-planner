@@ -10,7 +10,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.2.3";
+const VERSION="v1.2.4";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -55,7 +55,7 @@ function ComboBox({t,options,value,onChange,placeholder,onAdd,addLabel,s,extraTo
 }
 
 // ─── UI BITS ──────────────────────────────────────────────────────────────────
-function Mod({t,title,onClose,children,width=500}){return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}><div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:12,width:"100%",maxWidth:width,maxHeight:"85vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}><div style={{padding:"16px 20px",borderBottom:`1px solid ${t.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:15,fontWeight:600,color:t.tx}}>{title}</span><span onClick={onClose} style={{cursor:"pointer",color:t.txD,fontSize:18}}>✕</span></div><div style={{padding:"16px 20px",overflowY:"auto",flex:1}}>{children}</div></div></div>)}
+function Mod({t,title,onClose,children,width=500}){return(<div style={{position:"fixed",top:32,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}><div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:12,width:"100%",maxWidth:width,maxHeight:"calc(85vh - 32px)",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px rgba(0,0,0,0.4)"}}><div style={{padding:"16px 20px",borderBottom:`1px solid ${t.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:15,fontWeight:600,color:t.tx}}>{title}</span><span onClick={onClose} style={{cursor:"pointer",color:t.txD,fontSize:18}}>✕</span></div><div style={{padding:"16px 20px",overflowY:"auto",flex:1}}>{children}</div></div></div>)}
 function Fld({t,label,children,error}){return(<div style={{marginBottom:14}}><label style={{fontSize:11,color:error?t.wn:t.txD,textTransform:"uppercase",letterSpacing:1,display:"block",marginBottom:5}}>{label}{error&&<span style={{fontStyle:"italic",textTransform:"none",letterSpacing:0}}> — {error}</span>}</label>{children}</div>)}
 
 const mkS=t=>({
@@ -303,7 +303,11 @@ export default function App(){
     // Sort: sub-space items first (in space order), then non-sub-space alphabetically
     const spOrder=(data?.spaces||[]).map(x=>x.id);
     unique.sort((a,b)=>{const aIsSub=!!a.isAlsoSpace;const bIsSub=!!b.isAlsoSpace;if(aIsSub&&!bIsSub)return-1;if(!aIsSub&&bIsSub)return 1;if(aIsSub&&bIsSub)return spOrder.indexOf(a.isAlsoSpace)-spOrder.indexOf(b.isAlsoSpace);return dName(a).localeCompare(dName(b))});return unique},[view,selSp,selPr,search,filter,gRec,pM,iM,data]);
-  const stats=useMemo(()=>{let all;if(view==="spatial"){all=gRec(selSp)}else if(selPr&&pM[selPr]){all=pM[selPr].steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean)}else{all=data?.items||[]}const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),ownedCost:u.reduce((s,i)=>s+Math.min(i.qtyOwned||0,i.qtyNeeded||1)*(i.cost||0),0)}},[view,selSp,selPr,gRec,pM,iM,data]);
+  const stats=useMemo(()=>{let all;if(view==="spatial"){all=gRec(selSp)}else if(selPr&&pM[selPr]){
+    // Recursively collect items from this process and all descendants
+    const collectProcItems=(pid)=>{const proc=pM[pid];if(!proc)return[];const items=proc.steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean);const children=(data?.processes||[]).filter(p=>p.parent===pid);children.forEach(c=>items.push(...collectProcItems(c.id)));return items};
+    all=collectProcItems(selPr);
+  }else{all=data?.items||[]}const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),ownedCost:u.reduce((s,i)=>s+Math.min(i.qtyOwned||0,i.qtyNeeded||1)*(i.cost||0),0)}},[view,selSp,selPr,gRec,pM,iM,data]);
   const shopItems=useMemo(()=>(data?.items||[]).filter(i=>sfall(i)>0),[data]);
   const shopTotal=useMemo(()=>shopItems.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),[shopItems]);
 
@@ -437,8 +441,10 @@ export default function App(){
         setForm({isAlsoSpace:nid});
       } else {
         if(form.isAlsoSpace){
-          const ok=await askConfirm({title:"Remove Sub-Space?",msg:"This will delete the sub-space linked to this item.",okLabel:"Delete"});
+          const ok=await askConfirm({title:"Remove Sub-Space?",msg:"This will delete the sub-space and any items within it. The current item will not be deleted.",okLabel:"Remove"});
           if(!ok)return;
+          // Unlink the item from the space first so rmSp doesn't delete this item
+          edSp(form.isAlsoSpace,{linkedItemId:null});
           rmSp(form.isAlsoSpace);
         }
         setForm({isAlsoSpace:""});
@@ -568,7 +574,7 @@ export default function App(){
         <div style={{marginLeft:28}}><button style={s.bSm} onClick={()=>setForm(f=>({...f,steps:[...f.steps,{num:f.steps.length+1,action:"",itemId:null,subProcId:null}]}))}>+ Step</button></div>
       </Fld>
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-        {isEdit&&<button style={s.bD} onClick={async()=>{if(await askConfirm("Delete this process?")){rmPr(form.id);setSelPr(null);setModal(null)}}}>Delete</button>}
+        {isEdit&&<button style={s.bD} onClick={async()=>{if(await askConfirm({title:`Delete "${form.name}"?`,msg:"Sub-processes will become top-level. Items will not be deleted.",okLabel:"Delete"})){rmPr(form.id);setSelPr(form.parent||null);setModal(null)}}}>Delete</button>}
         <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
         <button style={s.bP} onClick={()=>{const e=valPr(form);setValE(e);if(Object.keys(e).length)return;
           if(isEdit){
@@ -601,7 +607,7 @@ export default function App(){
   const win=getCurrentWindow();
   return(<div style={{fontFamily:"'DM Sans','Helvetica Neue',sans-serif",background:t.bg,color:t.tx,height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
     {/* Custom title bar */}
-    <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none"}}>
+    <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
       <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
         <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}
       </div>
@@ -620,7 +626,7 @@ export default function App(){
     </div>
 
     {/* Custom confirm modal */}
-    {cfm&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3000}}>
+    {cfm&&<div style={{position:"fixed",top:32,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.4)",backdropFilter:"blur(3px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3000}}>
       <div style={{background:t.mBg,border:`1px solid ${t.bdI}`,borderRadius:10,padding:"20px 24px",maxWidth:400,width:"90%",boxShadow:"0 16px 50px rgba(0,0,0,0.4)"}}>
         {cfm.title&&<div style={{fontSize:15,fontWeight:700,color:t.tx,marginBottom:8}}>{cfm.title}</div>}
         <div style={{fontSize:13,color:t.txM,marginBottom:18,lineHeight:1.5,whiteSpace:"pre-line"}}>{cfm.msg}</div>
@@ -715,11 +721,10 @@ export default function App(){
             </div>
             {ch.length>0&&<div style={{marginTop:6,display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}><span style={{fontSize:10,color:t.txD,letterSpacing:0.5}}>Sub: </span>{ch.map((c,i)=><span key={c.id} style={{display:"inline-flex",alignItems:"center",gap:4}}>{i>0&&<span style={{color:t.txD,fontSize:10}}>→</span>}<span onClick={()=>setSelPr(c.id)} style={{fontSize:11,color:t.pp,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>{c.name}</span></span>)}</div>}
             <div style={{display:"flex",gap:6,marginTop:8}}>
+              <button style={s.bSm} onClick={()=>openPr(null,p.id)}>+ Sub-Process</button>
               <button style={s.bSm} onClick={()=>openPr(p)}>Edit Process</button>
               {canMovePr(p.id,-1)&&<button style={s.bSm} onClick={()=>movePr(p.id,-1)}>↑ Move Up</button>}
               {canMovePr(p.id,1)&&<button style={s.bSm} onClick={()=>movePr(p.id,1)}>↓ Move Down</button>}
-              <button style={s.bSm} onClick={()=>openPr(null,p.id)}>+ Sub-Process</button>
-              <button style={{...s.bSm,color:t.wn}} onClick={async()=>{if(await askConfirm(`Delete "${p.name}"? Sub-processes will become top-level.`)){const par=p.parent;rmPr(p.id);setSelPr(par||null)}}}>Delete</button>
             </div>
             <div style={{marginTop:12}}>{p.steps.map(step=>{
               const item=step.itemId?iM[step.itemId]:null;
