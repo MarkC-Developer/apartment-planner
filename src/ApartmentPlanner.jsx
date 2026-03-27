@@ -10,7 +10,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.2.4";
+const VERSION="v1.2.5";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -422,9 +422,8 @@ export default function App(){
         <div style={{marginBottom:8}}><div style={{fontSize:10,color:t.txD,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>Location</div>{item.spaces.filter(sid=>sM[sid]).map(sid=><div key={sid} onClick={e=>{e.stopPropagation();setView("spatial");setSelSp(sid)}} style={{fontSize:11,color:t.ac,cursor:"pointer",padding:"2px 0",textDecoration:"underline dotted",textUnderlineOffset:3}}>{gPt(sid)}</div>)}{item.spaces.filter(sid=>sM[sid]).length===0&&<div style={{fontSize:11,color:t.txD,fontStyle:"italic"}}>Unassigned</div>}</div>
         {procs.length>0&&<div style={{marginBottom:8}}><div style={{fontSize:10,color:t.txD,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>Used In</div>{procs.map(p=><div key={p.id} onClick={e=>{e.stopPropagation();setView("process");setSelPr(p.id)}} style={{fontSize:11,color:t.pp,cursor:"pointer",padding:"2px 0",textDecoration:"underline dotted",textUnderlineOffset:3}}>{p.name}</div>)}</div>}
         <div style={{display:"flex",gap:6,marginTop:8}}>
-          <button style={s.bSm} onClick={e=>{e.stopPropagation();openIt(item)}}>Edit</button>
+          <button style={s.bSm} onClick={e=>{e.stopPropagation();openIt(item)}}>Edit Item</button>
           <button style={s.bSm} onClick={e=>{e.stopPropagation();dupIt(item)}}>Duplicate</button>
-          <button style={{...s.bSm,color:t.wn}} onClick={async e=>{e.stopPropagation();if(await askConfirm({title:`Delete "${dn}"?`,msg:"This item will be removed from all locations and processes.",okLabel:"Delete"})){rmIt(item.id);setSelIt(null)}}}>Delete</button>
         </div>
       </div>)}
     </div>);
@@ -443,9 +442,14 @@ export default function App(){
         if(form.isAlsoSpace){
           const ok=await askConfirm({title:"Remove Sub-Space?",msg:"This will delete the sub-space and any items within it. The current item will not be deleted.",okLabel:"Remove"});
           if(!ok)return;
-          // Unlink the item from the space first so rmSp doesn't delete this item
-          edSp(form.isAlsoSpace,{linkedItemId:null});
-          rmSp(form.isAlsoSpace);
+          // Delete space directly without linked-item deletion (item is being kept)
+          const spId=form.isAlsoSpace;
+          const desc=[];const coll=pid=>{gCh(pid).forEach(c=>{desc.push(c.id);coll(c.id)})};coll(spId);const allSp=[spId,...desc];
+          upd(d=>{
+            d.spaces=d.spaces.filter(x=>!allSp.includes(x.id));
+            d.items.forEach(i=>{i.spaces=i.spaces.filter(x=>!allSp.includes(x));if(allSp.includes(i.isAlsoSpace))i.isAlsoSpace=""});
+          });
+          toast("Removed sub-space");
         }
         setForm({isAlsoSpace:""});
       }
@@ -487,8 +491,10 @@ export default function App(){
       </div>
       <Fld t={t} label="URL"><div style={{display:"flex",gap:0}}><input style={{...s.input,borderTopRightRadius:0,borderBottomRightRadius:0}} value={form.url||""} onChange={ev=>setForm({url:ev.target.value})} placeholder="https://…"/><button onClick={()=>{if(form.url)shellOpen(form.url)}} disabled={!form.url} style={{...s.bSm,borderRadius:0,borderTopRightRadius:6,borderBottomRightRadius:6,padding:"8px 10px",fontSize:13,opacity:form.url?1:0.3,borderLeft:"none"}} title="Open">↗</button></div></Fld>
       <Fld t={t} label="Notes"><textarea style={{...s.input,minHeight:50,resize:"vertical"}} value={form.notes} onChange={ev=>setForm({notes:ev.target.value})}/></Fld>
+      {isEdit&&(()=>{const procs=(data?.processes||[]).filter(p=>p.steps.some(st=>st.itemId===form.id));return procs.length>0?<div style={{marginTop:4}}><div style={{fontSize:10,color:t.txD,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>Used In</div>{procs.map(p=><div key={p.id} onClick={()=>{setModal(null);setView("process");setSelPr(p.id)}} style={{fontSize:11,color:t.pp,cursor:"pointer",padding:"2px 0",textDecoration:"underline dotted",textUnderlineOffset:3}}>{p.name}</div>)}</div>:null})()}
       <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-        <button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
+        {isEdit&&<button style={s.bD} onClick={async()=>{if(await askConfirm({title:`Delete "${dName(form)}"?`,msg:"This item will be removed from all locations and processes.",okLabel:"Delete"})){rmIt(form.id);setSelIt(null);setModal(null)}}}>Delete</button>}
+        <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
         <button style={s.bP} onClick={()=>{const e=valIt(form);setValE(e);if(Object.keys(e).length)return;const cost=form.cost===""||form.cost==null?null:Math.max(0,Number(form.cost));const qN=Math.max(1,Number(form.qtyNeeded)||1);const qO=Math.min(Math.max(0,Number(form.qtyOwned)||0),qN);
           if(isEdit){
             edIt(form.id,{...form,cost,qtyNeeded:qN,qtyOwned:qO});
