@@ -1,6 +1,6 @@
 # Apartment Planner — Tauri Desktop App
 
-A local-first spatial and process planning tool. Your data lives as `.json` files on your own filesystem — no cloud, no localStorage, no browser dependency.
+A spatial and process planning tool. Developed as an experiment of using Claude to convert a web application into a Tauri-based deployment.
 
 ## Installation
 **Installer**: Download latest installer from Releases on the sidebar:
