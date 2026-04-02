@@ -10,7 +10,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.2.6";
+const VERSION="v1.3.0";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -85,7 +85,8 @@ export default function App(){
   const[recentFiles,setRecentFiles]=useState([]); // [{path, name, last_opened}]
   const[lastDir,setLastDir]=useState(""); // last-used directory for dialogs
   const[treeFilter,setTreeFilter]=useState(null); // null | "owned" | "needed"
-  const nameRef=useRef(null);const undoRef=useRef(null);const toastTimer=useRef(null);
+  const[depth,setDepth]=useState("full"); // "full" | "current"
+  const nameRef=useRef(null);const undoRef=useRef(null);const toastTimer=useRef(null);const listRef=useRef(null);
   const[ctxMenu,setCtxMenu]=useState(null); // {x, y} for right-click context menu
   const[cfm,setCfm]=useState(null); // {title, msg, okLabel, buttons, resolve}
   const[isMaximized,setIsMaximized]=useState(false);
@@ -106,6 +107,8 @@ export default function App(){
   useEffect(()=>{let el=document.getElementById("apt-ts");if(!el){el=document.createElement("style");el.id="apt-ts";document.head.appendChild(el)}el.textContent=`select,option{background:${t.selBg}!important;color:${t.selTx}!important}option:checked{background:${t.selH}!important}select:focus{outline:1px solid ${t.acBd}}body{background:${t.bg}}`},[t]);
   // Track maximized state for title bar button
   useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
+  // Disable default browser right-click menu
+  useEffect(()=>{const h=e=>{if(!e.target.closest("[data-allow-ctx]"))e.preventDefault()};document.addEventListener("contextmenu",h);return()=>document.removeEventListener("contextmenu",h)},[]);
 
   // Persistence — Plans are .json files on disk, config tracks recents + last file
   useEffect(()=>{(async()=>{
@@ -259,21 +262,19 @@ export default function App(){
   const addSp=useCallback(sp=>upd(d=>d.spaces.push(sp)),[upd]);
   const edSp=useCallback((id,u)=>upd(d=>{const i=d.spaces.findIndex(x=>x.id===id);if(i>=0)Object.assign(d.spaces[i],u)}),[upd]);
   const rmSp=useCallback(id=>{const snap=JSON.parse(JSON.stringify(data));const desc=[];const coll=pid=>{gCh(pid).forEach(c=>{desc.push(c.id);coll(c.id)})};coll(id);const all=[id,...desc];
-    // Collect linked items to also delete
     const linkedItems=all.map(sid=>{const sp=sM[sid];return sp?.linkedItemId}).filter(Boolean);
     upd(d=>{
       d.spaces=d.spaces.filter(x=>!all.includes(x.id));
       d.items.forEach(i=>{i.spaces=i.spaces.filter(x=>!all.includes(x));if(all.includes(i.isAlsoSpace))i.isAlsoSpace=""});
       if(linkedItems.length)d.items=d.items.filter(i=>!linkedItems.includes(i.id));
-      // Clean up process step references to deleted items
       if(linkedItems.length)d.processes.forEach(p=>p.steps.forEach(st=>{if(linkedItems.includes(st.itemId))st.itemId=null}));
     });toast("Deleted space"+(linkedItems.length?" and linked item"+(linkedItems.length>1?"s":""):""),()=>{setData(snap);setDirty(true);clearToast()})},[data,upd,gCh,sM,toast,clearToast]);
   // Delete space only — preserves linked items (used when unchecking sub-space or "Delete Only Space")
-  const rmSpOnly=useCallback(id=>{const desc=[];const coll=pid=>{gCh(pid).forEach(c=>{desc.push(c.id);coll(c.id)})};coll(id);const allSp=[id,...desc];
+  const rmSpOnly=useCallback(id=>{const snap=JSON.parse(JSON.stringify(data));const desc=[];const coll=pid=>{gCh(pid).forEach(c=>{desc.push(c.id);coll(c.id)})};coll(id);const allSp=[id,...desc];
     upd(d=>{
       d.spaces=d.spaces.filter(x=>!allSp.includes(x.id));
       d.items.forEach(i=>{i.spaces=i.spaces.filter(x=>!allSp.includes(x));if(allSp.includes(i.isAlsoSpace))i.isAlsoSpace=""});
-    });toast("Deleted space")},[upd,gCh,toast]);
+    });toast("Deleted space",()=>{setData(snap);setDirty(true);clearToast()})},[data,upd,gCh,toast,clearToast]);
   const addPr=useCallback(p=>upd(d=>d.processes.push(p)),[upd]);
   const edPr=useCallback((id,u)=>upd(d=>{const i=d.processes.findIndex(x=>x.id===id);if(i>=0)Object.assign(d.processes[i],u)}),[upd]);
 
@@ -306,16 +307,22 @@ export default function App(){
   const allSpOpts=useMemo(()=>(data?.spaces||[]).map(x=>({value:x.id,label:gPt(x.id)})),[data,gPt]);
   const gPrPt=useCallback(pid=>{const r=[];let c=pid;while(c&&pM[c]){r.unshift(pM[c].name);c=pM[c].parent}return r.join(" → ")},[pM]);
 
+  // Build depth-first tree order for consistent sub-space sorting
+  const treeOrder=useMemo(()=>{const order=[];const walk=pid=>{gCh(pid).forEach(c=>{order.push(c.id);walk(c.id)})};walk("s_apt");return order},[gCh]);
+
+  // Recursively collect items from a process and all descendants
+  const collectProcItems=useCallback((pid)=>{const proc=pM[pid];if(!proc)return[];const items=proc.steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean);const children=(data?.processes||[]).filter(p=>p.parent===pid);children.forEach(c=>items.push(...collectProcItems(c.id)));return items},[pM,iM,data]);
+
   // Filtered + stats
-  const filtered=useMemo(()=>{let items;if(view==="spatial")items=gRec(selSp);else{if(!selPr||!pM[selPr])return[];items=pM[selPr].steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean)}if(search){const q=search.toLowerCase();items=items.filter(i=>(i.name+i.category+i.brand+i.model+(i.configuration||"")+i.notes).toLowerCase().includes(q))}if(filter==="owned")items=items.filter(isOw);if(filter==="needed")items=items.filter(i=>!isOw(i));const unique=[...new Map(items.map(i=>[i.id,i])).values()];
-    // Sort: sub-space items first (in space order), then non-sub-space alphabetically
-    const spOrder=(data?.spaces||[]).map(x=>x.id);
-    unique.sort((a,b)=>{const aIsSub=!!a.isAlsoSpace;const bIsSub=!!b.isAlsoSpace;if(aIsSub&&!bIsSub)return-1;if(!aIsSub&&bIsSub)return 1;if(aIsSub&&bIsSub)return spOrder.indexOf(a.isAlsoSpace)-spOrder.indexOf(b.isAlsoSpace);return dName(a).localeCompare(dName(b))});return unique},[view,selSp,selPr,search,filter,gRec,pM,iM,data]);
+  const filtered=useMemo(()=>{let items;
+    if(view==="spatial"){items=depth==="current"?gIn(selSp):gRec(selSp)}
+    else{if(!selPr||!pM[selPr])return[];items=depth==="current"?pM[selPr].steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean):collectProcItems(selPr)}
+    if(search){const q=search.toLowerCase();items=items.filter(i=>(i.name+i.category+i.brand+i.model+(i.configuration||"")+i.notes).toLowerCase().includes(q))}if(filter==="owned")items=items.filter(isOw);if(filter==="needed")items=items.filter(i=>!isOw(i));const unique=[...new Map(items.map(i=>[i.id,i])).values()];
+    // Sort: sub-space items first (in tree-traversal order), then non-sub-space alphabetically
+    unique.sort((a,b)=>{const aIsSub=!!a.isAlsoSpace;const bIsSub=!!b.isAlsoSpace;if(aIsSub&&!bIsSub)return-1;if(!aIsSub&&bIsSub)return 1;if(aIsSub&&bIsSub)return treeOrder.indexOf(a.isAlsoSpace)-treeOrder.indexOf(b.isAlsoSpace);return dName(a).localeCompare(dName(b))});return unique},[view,selSp,selPr,search,filter,depth,gIn,gRec,collectProcItems,pM,iM,treeOrder]);
   const stats=useMemo(()=>{let all;if(view==="spatial"){all=gRec(selSp)}else if(selPr&&pM[selPr]){
-    // Recursively collect items from this process and all descendants
-    const collectProcItems=(pid)=>{const proc=pM[pid];if(!proc)return[];const items=proc.steps.filter(st=>st.itemId).map(st=>iM[st.itemId]).filter(Boolean);const children=(data?.processes||[]).filter(p=>p.parent===pid);children.forEach(c=>items.push(...collectProcItems(c.id)));return items};
     all=collectProcItems(selPr);
-  }else{all=data?.items||[]}const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),ownedCost:u.reduce((s,i)=>s+Math.min(i.qtyOwned||0,i.qtyNeeded||1)*(i.cost||0),0)}},[view,selSp,selPr,gRec,pM,iM,data]);
+  }else{all=data?.items||[]}const u=[...new Map(all.map(i=>[i.id,i])).values()];const nd=u.filter(i=>!isOw(i));return{total:u.length,owned:u.length-nd.length,needed:nd.length,cost:u.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),ownedCost:u.reduce((s,i)=>s+Math.min(i.qtyOwned||0,i.qtyNeeded||1)*(i.cost||0),0)}},[view,selSp,selPr,gRec,collectProcItems,pM,iM,data]);
   const shopItems=useMemo(()=>(data?.items||[]).filter(i=>sfall(i)>0),[data]);
   const shopTotal=useMemo(()=>shopItems.reduce((s,i)=>s+sfall(i)*(i.cost||0),0),[shopItems]);
 
@@ -334,9 +341,11 @@ export default function App(){
   const valPr=f=>{const e={};if(!f.name?.trim())e.name="Required";if(!f.steps?.length)e.steps="≥1";else if(f.steps.some(x=>!x.action?.trim()))e.steps="Steps need text";return e};
 
   // Modal openers
-  const openIt=useCallback((item=null,defSp=null)=>{setValE({});setModal({type:"item",isEdit:!!item,form:item?{...item,cost:item.cost??"",configuration:item.configuration||"",configInTitle:item.configInTitle!==false,modelInTitle:item.modelInTitle!==false}:{name:"",brand:"",model:"",configuration:"",category:"",qtyNeeded:1,qtyOwned:0,cost:"",dimensions:"",url:"",notes:"",spaces:defSp?[defSp]:[],isAlsoSpace:"",modelInTitle:true,configInTitle:true},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
+  const openIt=useCallback((item=null,defSp=null)=>{
+    const scrollPos=listRef.current?.scrollTop;
+    setValE({});setModal({type:"item",isEdit:!!item,scrollPos,form:item?{...item,cost:item.cost??"",configuration:item.configuration||"",configInTitle:item.configInTitle!==false,modelInTitle:item.modelInTitle!==false}:{name:"",brand:"",model:"",configuration:"",category:"",qtyNeeded:1,qtyOwned:0,cost:"",dimensions:"",url:"",notes:"",spaces:defSp?[defSp]:[],isAlsoSpace:"",modelInTitle:true,configInTitle:true},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
   const openSp=useCallback((sp=null,defP=null)=>{setValE({});const par=defP||"s_apt";const parType=sM[par]?.type;const defType=parType==="unit"?"room":parType==="room"?"furniture":"container";setModal({type:"space",isEdit:!!sp,form:sp?{...sp}:{name:"",type:defType,parent:par,dimensions:"",notes:"",linkedItemId:null},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[sM]);
-  const openPr=useCallback((proc=null,defPar=null)=>{setValE({});setModal({type:"process",isEdit:!!proc,form:proc?JSON.parse(JSON.stringify(proc)):{name:"",frequency:"",location:"s_apt",parent:defPar||null,steps:[{num:1,action:"",itemId:null,subProcId:null}]},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
+  const openPr=useCallback((proc=null,defPar=null)=>{const scrollPos=listRef.current?.scrollTop;setValE({});setModal({type:"process",isEdit:!!proc,scrollPos,form:proc?JSON.parse(JSON.stringify(proc)):{name:"",frequency:"",location:"s_apt",parent:defPar||null,steps:[{num:1,action:"",itemId:null,subProcId:null}]},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
   const dupIt=useCallback(item=>{const nid=uid("i");const dup={...JSON.parse(JSON.stringify(item)),id:nid,name:item.name+" (copy)"};addIt(dup);setSelIt(nid);toast(`Duplicated "${item.name}"`);openIt(dup)},[addIt,toast,openIt]);
 
   // Expand
@@ -347,6 +356,9 @@ export default function App(){
 
   useEffect(()=>{const tr=gBd(selSp);const e={};tr.slice(0,-1).forEach(x=>{e[x.id]=true});setExp(p=>({...p,...e}))},[selSp,gBd]);
   useEffect(()=>{if(!selPr||!pM[selPr])return;const e={};let c=selPr;while(c&&pM[c]){e[c]=true;c=pM[c].parent}setPExp(p=>({...p,...e}))},[selPr,pM]);
+  // Restore scroll position after modal closes
+  const prevModal=useRef(null);
+  useEffect(()=>{if(prevModal.current&&!modal&&prevModal.current.scrollPos!=null){setTimeout(()=>{if(listRef.current)listRef.current.scrollTop=prevModal.current.scrollPos},0)}prevModal.current=modal},[modal]);
 
   if(loading||!data)return<div style={{fontFamily:"'DM Sans',sans-serif",background:t.bg,color:t.tx,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}>Loading…</div>;
 
@@ -541,7 +553,7 @@ export default function App(){
           setSelSp(form.parent||"s_apt");setModal(null);
         }}>Delete</button>}
         <div style={{flex:1}}/><button style={s.bS} onClick={()=>setModal(null)}>Cancel</button>
-        <button style={s.bP} onClick={()=>{const e=valSp(form);setValE(e);if(Object.keys(e).length)return;const saveForm=isRoot?{...form,type:"unit",linkedItemId:null}:form;if(isEdit){edSp(form.id,saveForm);if(!isRoot&&saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:form.id,dimensions:saveForm.dimensions||""})}}else{const ns={...saveForm,id:uid("s")};addSp(ns);if(saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:ns.id,dimensions:saveForm.dimensions||""})}setSelSp(ns.id)}setModal(null)}}>{isRoot?"Save":isEdit?"Save":"Add Space"}</button>
+        <button style={s.bP} onClick={()=>{const e=valSp(form);setValE(e);if(Object.keys(e).length)return;const saveForm=isRoot?{...form,type:"unit",linkedItemId:null}:form;if(isEdit){edSp(form.id,saveForm);if(!isRoot&&saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:form.id,dimensions:saveForm.dimensions||"",name:saveForm.name})}}else{const ns={...saveForm,id:uid("s")};addSp(ns);if(saveForm.linkedItemId){const it=iM[saveForm.linkedItemId];if(it)edIt(it.id,{...it,isAlsoSpace:ns.id,dimensions:saveForm.dimensions||"",name:saveForm.name})}setSelSp(ns.id)}setModal(null)}}>{isRoot?"Save":isEdit?"Save":"Add Space"}</button>
       </div>
     </Mod>);
   };
@@ -674,14 +686,14 @@ export default function App(){
           {editName?<input ref={nameRef} value={nameVal} onChange={e=>setNameVal(e.target.value)} onBlur={()=>{const n=nameVal.trim();if(n&&n!==data.name){if(activePath)renamePlan(n);else setData(prev=>{const nd={...prev,name:n};setDirty(true);return nd})}setEditName(false)}} onKeyDown={e=>{if(e.key==="Enter")e.target.blur();if(e.key==="Escape")setEditName(false)}} style={{fontSize:17,fontWeight:700,letterSpacing:"-0.02em",background:t.inBg,border:`1px solid ${t.acBd}`,borderRadius:6,color:t.tx,padding:"2px 8px",outline:"none",fontFamily:"inherit",width:280}}/>
           :<h1 onClick={()=>{setNameVal(data.name);setEditName(true);setTimeout(()=>nameRef.current?.select(),0)}} style={{fontSize:17,fontWeight:700,margin:0,letterSpacing:"-0.02em",cursor:"pointer",borderBottom:`1px dashed ${t.bd}`,paddingBottom:1}} title="Click to rename">{data.name}</h1>}
           <div style={{fontSize:10,color:t.txD,marginTop:2,display:"flex",gap:8,alignItems:"center"}}>
-            <span>{data.items.length} items · {data.spaces.length} spaces · {data.processes.length} routines</span>
+            <span>{data.items.length} items · {data.spaces.length} spaces · {data.processes.length} processes</span>
             {activePath?<span style={{color:dirty?t.wn:t.ac}}>{dirty?"● unsaved":lastSaved?`✓ ${lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}).toLowerCase()} auto-saved`:""}</span>:<span style={{fontSize:10,color:t.txD,fontStyle:"italic"}}>{isSample?"sample — save to create a file":"save to create a file"}</span>}
           </div>
         </div>
         <div style={{display:"flex",gap:5,alignItems:"center",flexWrap:"wrap"}}>
           <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>startNew()} title="New blank plan">New</button>
           <div style={{position:"relative"}}>
-            <button style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">Open</button>
+            <button data-allow-ctx style={{...s.bSm,height:28,display:"flex",alignItems:"center"}} onClick={()=>openFile()} onContextMenu={e=>{e.preventDefault();setCtxMenu({x:e.clientX,y:e.clientY})}} title="Open plan (right-click for options)">Open</button>
             {ctxMenu&&<><div onClick={()=>setCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999}}/><div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,background:t.dBg,border:`1px solid ${t.dBd}`,borderRadius:6,padding:4,zIndex:1000,boxShadow:"0 8px 24px rgba(0,0,0,0.3)",minWidth:140}}>
               <div onClick={()=>{openFile();setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:12,color:t.tx,cursor:"pointer",borderRadius:4}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>Open file…</div>
               {recentFiles.length>0&&<><div style={{borderTop:`1px solid ${t.bdL}`,margin:"2px 0"}}/>{recentFiles.slice(0,5).map(f=><div key={f.path} onClick={()=>{loadRecent(f.path);setCtxMenu(null)}} style={{padding:"6px 12px",fontSize:11,color:t.txM,cursor:"pointer",borderRadius:4,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} onMouseEnter={e=>e.currentTarget.style.background=t.dH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{f.name}</div>)}</>}
@@ -709,7 +721,7 @@ export default function App(){
     <div style={{display:"flex",flex:1,minHeight:0,overflow:"hidden"}}>
       <div style={{width:280,minWidth:280,borderRight:`1px solid ${t.bd}`,display:"flex",flexDirection:"column",overflow:"hidden"}}>
         <div style={{padding:"10px 10px 6px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:10,color:t.txD,textTransform:"uppercase",letterSpacing:1.5}}>{view==="spatial"?"Spatial":"Routines"}</span>
+          <span style={{fontSize:10,color:t.txD,textTransform:"uppercase",letterSpacing:1.5}}>{view==="spatial"?"Spatial":"Procedural"}</span>
           <div style={{display:"flex",gap:3}}>
             <button style={{...s.bSm,fontSize:10,padding:"3px 8px"}} onClick={()=>{if(view==="spatial")openSp(null,"s_apt");else openPr(null,null)}}>+</button>
           </div>
@@ -765,15 +777,15 @@ export default function App(){
                 </div>
               </div>})}</div>
           </>})()}
-          {view==="process"&&!selPr&&<div style={{color:t.txD,fontSize:13}}>Select a routine.</div>}
+          {view==="process"&&!selPr&&<div style={{color:t.txD,fontSize:13}}>Select a process.</div>}
         </div>
 
         <div style={{padding:"10px 18px 6px",flexShrink:0,display:"flex",gap:6,alignItems:"center"}}>
-          <input type="text" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1,padding:"7px 11px",background:t.inBg,border:`1px solid ${t.bd}`,borderRadius:6,color:t.tx,fontSize:12,outline:"none",fontFamily:"inherit"}}/>
-          <div style={{display:"flex",background:t.bsBg,borderRadius:6,padding:2}}>{["all","owned","needed"].map(f=><div key={f} onClick={()=>setFilter(f)} style={{padding:"4px 9px",borderRadius:4,fontSize:11,cursor:"pointer",textTransform:"capitalize",background:filter===f?t.acS:"transparent",color:filter===f?t.tx:t.txD,fontWeight:filter===f?600:400}}>{f}</div>)}</div>
-          <button style={{...s.bSm,fontSize:11}} onClick={()=>openIt()}>+ Item</button>
+          <input type="text" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:1,minWidth:80,padding:"7px 11px",background:t.inBg,border:`1px solid ${t.bd}`,borderRadius:6,color:t.tx,fontSize:12,outline:"none",fontFamily:"inherit"}}/>
+          <div style={{display:"flex",background:t.bsBg,borderRadius:6,padding:2,flexShrink:0}}>{[{k:"full",l:"Full Depth"},{k:"current",l:"At Current Level"}].map(d=><div key={d.k} onClick={()=>setDepth(d.k)} style={{padding:"4px 9px",borderRadius:4,fontSize:11,cursor:"pointer",background:depth===d.k?t.acS:"transparent",color:depth===d.k?t.tx:t.txD,fontWeight:depth===d.k?600:400,whiteSpace:"nowrap"}}>{d.l}</div>)}</div>
+          <div style={{display:"flex",background:t.bsBg,borderRadius:6,padding:2,flexShrink:0}}>{["all","owned","needed"].map(f=><div key={f} onClick={()=>setFilter(f)} style={{padding:"4px 9px",borderRadius:4,fontSize:11,cursor:"pointer",textTransform:"capitalize",background:filter===f?t.acS:"transparent",color:filter===f?t.tx:t.txD,fontWeight:filter===f?600:400}}>{f}</div>)}</div>
         </div>
-        <div style={{flex:1,overflowY:"auto",padding:"6px 18px 20px"}}>{filtered.length===0?<div style={{textAlign:"center",padding:30,color:t.txD,fontSize:13}}>{search?"No match.":view==="spatial"?"No items here.":"Select a process."}</div>:filtered.map(i=><ItemCard key={i.id} item={i}/>)}</div>
+        <div ref={listRef} style={{flex:1,overflowY:"auto",padding:"6px 18px 20px"}}>{filtered.length===0?<div style={{textAlign:"center",padding:30,color:t.txD,fontSize:13}}>{search?"No match.":view==="spatial"?"No items here.":"Select a process."}</div>:filtered.map(i=><ItemCard key={i.id} item={i}/>)}</div>
       </div>
     </div>
 
