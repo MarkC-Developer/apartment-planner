@@ -133,6 +133,13 @@ fn remove_recent(path: String) -> Result<AppConfig, String> {
 }
 
 #[tauri::command]
+fn clear_last_file() -> Result<(), String> {
+    let mut cfg = load_config();
+    cfg.last_file = String::new();
+    save_config(&cfg)
+}
+
+#[tauri::command]
 fn file_exists(path: String) -> bool {
     PathBuf::from(&path).exists()
 }
@@ -161,6 +168,7 @@ pub fn run() {
             touch_recent,
             set_theme,
             remove_recent,
+            clear_last_file,
             file_exists,
         ])
         .run(tauri::generate_context!())
