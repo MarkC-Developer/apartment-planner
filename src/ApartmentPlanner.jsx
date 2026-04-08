@@ -10,7 +10,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.3.1";
+const VERSION="v1.3.4";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -280,7 +280,22 @@ export default function App(){
   const addPr=useCallback(p=>upd(d=>d.processes.push(p)),[upd]);
   const edPr=useCallback((id,u)=>upd(d=>{const i=d.processes.findIndex(x=>x.id===id);if(i>=0)Object.assign(d.processes[i],u)}),[upd]);
 
-  const rmPr=useCallback(id=>{const snap=JSON.parse(JSON.stringify(data));upd(d=>{d.processes=d.processes.filter(p=>p.id!==id);d.processes.forEach(p=>{if(p.parent===id)p.parent=null;p.steps?.forEach(st=>{if(st.subProcId===id)st.subProcId=null})})});toast("Deleted process",()=>{setData(snap);setDirty(true);clearToast()})},[data,upd,toast,clearToast]);
+  const rmPr=useCallback(id=>{const snap=JSON.parse(JSON.stringify(data));upd(d=>{
+    d.processes=d.processes.filter(p=>p.id!==id);
+    d.processes.forEach(p=>{
+      if(p.parent===id)p.parent=null;
+      // Remove steps that reference this deleted sub-process, unless it's the only step
+      if(p.steps&&p.steps.some(st=>st.subProcId===id)){
+        if(p.steps.length>1){
+          p.steps=p.steps.filter(st=>st.subProcId!==id);
+          p.steps.forEach((s,i)=>s.num=i+1);
+        } else {
+          // Only step — keep it but unlink
+          p.steps.forEach(st=>{if(st.subProcId===id)st.subProcId=null});
+        }
+      }
+    });
+  });toast("Deleted process",()=>{setData(snap);setDirty(true);clearToast()})},[data,upd,toast,clearToast]);
 
   // Move up/down among siblings
   const moveSp=useCallback((id,dir)=>{upd(d=>{const sp=d.spaces.find(x=>x.id===id);if(!sp)return;const siblings=d.spaces.filter(x=>x.parent===sp.parent);const idx=siblings.findIndex(x=>x.id===id);const swapIdx=idx+dir;if(swapIdx<0||swapIdx>=siblings.length)return;const swapId=siblings[swapIdx].id;const ai=d.spaces.findIndex(x=>x.id===id);const bi=d.spaces.findIndex(x=>x.id===swapId);[d.spaces[ai],d.spaces[bi]]=[d.spaces[bi],d.spaces[ai]]})},[upd]);
@@ -431,6 +446,7 @@ export default function App(){
             {lsp.length>0&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.ppBg,color:t.pp}}>Sub-Space</span>}
             {item.category&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:`${cc}22`,color:cc,fontWeight:500}}>{item.category}</span>}
             {!own&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.wnS,color:t.wn}}>{sh<=1?"Needed":`Need ${sh}`}</span>}
+            {!item.brand&&!item.model&&!item.configuration&&!item.url&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.tgBg,color:t.txD,fontStyle:"italic"}}>Unspecified</span>}
           </div>
         </div>
       </div>
@@ -774,7 +790,7 @@ export default function App(){
                   {subProc?
                     <span onClick={()=>setSelPr(subProc.id)} style={{fontSize:13,color:t.pp,cursor:"pointer",textDecoration:"underline dotted",textUnderlineOffset:3}}>{step.action}</span>
                     :<span style={{fontSize:13}}>{step.action}</span>}
-                  {item&&<div onClick={()=>setSelIt(selIt===item.id?null:item.id)} style={{fontSize:11,marginTop:3,display:"inline-flex",alignItems:"center",gap:4,color:isOw(item)?t.ac:t.wn,cursor:"pointer",background:t.srfS,padding:"2px 7px",borderRadius:4}}><span style={{width:5,height:5,borderRadius:"50%",background:isOw(item)?t.ac:t.wn}}/>{dName(item)}{!isOw(item)&&item.cost!=null&&<span style={{opacity:0.7}}> · ${fmt(item.cost)}/ea</span>}</div>}
+                  {item&&<div onClick={()=>setSelIt(selIt===item.id?null:item.id)} style={{fontSize:11,marginTop:3,display:"inline-flex",alignItems:"center",gap:4,color:isOw(item)?t.ac:t.wn,cursor:"pointer",background:t.srfS,padding:"2px 7px",borderRadius:4}}><span style={{width:5,height:5,borderRadius:"50%",background:isOw(item)?t.ac:t.wn}}/>{dName(item)}</div>}
                 </div>
               </div>})}</div>
           </>})()}
