@@ -4,13 +4,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { save as saveDialog, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 // ─── THEMES ───────────────────────────────────────────────────────────────────
 const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"rgba(255,255,255,0.025)",tx:"#e8e4de",txM:"#a09b93",txD:"#7a7670",bd:"rgba(255,255,255,0.06)",bdL:"rgba(255,255,255,0.04)",bdI:"rgba(255,255,255,0.1)",ac:"#7BA89D",acBg:"rgba(123,168,157,0.18)",acBd:"rgba(123,168,157,0.4)",acS:"rgba(123,168,157,0.2)",wn:"#D2856B",wnBg:"rgba(210,133,107,0.15)",wnBd:"rgba(210,133,107,0.4)",wnS:"rgba(210,133,107,0.12)",pp:"#9B7BB8",ppBg:"rgba(155,123,184,0.15)",bl:"#6B8FD2",inBg:"rgba(255,255,255,0.03)",btnBg:"rgba(255,255,255,0.07)",bsBg:"rgba(255,255,255,0.07)",tgBg:"rgba(255,255,255,0.06)",cr:"#3a3835",mBg:"#242220",selBg:"#242220",selTx:"#e8e4de",selH:"#3a3835",tBg:"#2d2a27",tBd:"rgba(123,168,157,0.3)",dBg:"#2d2a27",dH:"#3a3835",dBd:"rgba(255,255,255,0.1)"},
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.3.4";
+const VERSION="v1.4.0";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -90,6 +91,7 @@ export default function App(){
   const[ctxMenu,setCtxMenu]=useState(null); // {x, y} for right-click context menu
   const[cfm,setCfm]=useState(null); // {title, msg, okLabel, buttons, resolve}
   const[isMaximized,setIsMaximized]=useState(false);
+  const[latestVersion,setLatestVersion]=useState(null); // {version, url} or null
   const askConfirm=useCallback((msgOrOpts)=>{
     const opts=typeof msgOrOpts==="string"?{msg:msgOrOpts}:msgOrOpts;
     return new Promise(resolve=>setCfm({title:opts.title||null,msg:opts.msg,okLabel:opts.okLabel||"Ok",buttons:opts.buttons||null,resolve}));
@@ -109,6 +111,18 @@ export default function App(){
   useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
   // Disable default browser right-click menu
   useEffect(()=>{const h=e=>{if(!e.target.closest("[data-allow-ctx]"))e.preventDefault()};document.addEventListener("contextmenu",h);return()=>document.removeEventListener("contextmenu",h)},[]);
+
+  // Check GitHub for latest release on launch — silent failure if offline
+  useEffect(()=>{(async()=>{
+    try{
+      const res=await tauriFetch("https://api.github.com/repos/MarkC-Developer/apartment-planner/releases/latest",{method:"GET"});
+      if(!res.ok)return;
+      const d=await res.json();
+      if(d?.tag_name&&d.tag_name!==VERSION&&d?.html_url){
+        setLatestVersion({version:d.tag_name,url:d.html_url});
+      }
+    }catch{}
+  })()},[]);
 
   // Persistence — Plans are .json files on disk, config tracks recents + last file
   useEffect(()=>{(async()=>{
@@ -446,7 +460,7 @@ export default function App(){
             {lsp.length>0&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.ppBg,color:t.pp}}>Sub-Space</span>}
             {item.category&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:`${cc}22`,color:cc,fontWeight:500}}>{item.category}</span>}
             {!own&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.wnS,color:t.wn}}>{sh<=1?"Needed":`Need ${sh}`}</span>}
-            {!item.brand&&!item.model&&!item.configuration&&!item.url&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.tgBg,color:t.txD,fontStyle:"italic"}}>Unspecified</span>}
+            {!item.brand&&!item.model&&!item.configuration&&!item.url&&<span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:t.tgBg,color:t.txD}}>Unspecified</span>}
           </div>
         </div>
       </div>
@@ -663,7 +677,7 @@ export default function App(){
     {/* Custom title bar */}
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
       <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
-        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}
+        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}{latestVersion&&<span data-allow-ctx onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,flexShrink:0}}/>}
       </div>
       <div style={{display:"flex",height:"100%"}}>
         <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
