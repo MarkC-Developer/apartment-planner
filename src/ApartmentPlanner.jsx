@@ -11,7 +11,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.4.0";
+const VERSION="v1.4.2";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -377,7 +377,7 @@ export default function App(){
     setValE({});setModal({type:"item",isEdit:!!item,form:item?{...item,cost:item.cost??"",configuration:item.configuration||"",configInTitle:item.configInTitle!==false,modelInTitle:item.modelInTitle!==false}:{name:"",brand:"",model:"",configuration:"",category:"",qtyNeeded:1,qtyOwned:0,cost:"",dimensions:"",url:"",notes:"",spaces:defSp?[defSp]:[],isAlsoSpace:"",modelInTitle:true,configInTitle:true},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
   const openSp=useCallback((sp=null,defP=null)=>{if(listRef.current)scrollSave.current=listRef.current.scrollTop;setValE({});const par=defP||"s_apt";const parType=sM[par]?.type;const defType=parType==="unit"?"room":parType==="room"?"furniture":"container";setModal({type:"space",isEdit:!!sp,form:sp?{...sp}:{name:"",type:defType,parent:par,dimensions:"",notes:"",linkedItemId:null},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[sM]);
   const openPr=useCallback((proc=null,defPar=null)=>{if(listRef.current)scrollSave.current=listRef.current.scrollTop;setValE({});setModal({type:"process",isEdit:!!proc,form:proc?JSON.parse(JSON.stringify(proc)):{name:"",frequency:"",location:"s_apt",parent:defPar||null,steps:[{num:1,action:"",itemId:null,subProcId:null}]},setForm:fn=>setModal(p=>({...p,form:typeof fn==="function"?fn(p.form):{...p.form,...fn}}))})},[]);
-  const dupIt=useCallback(item=>{const nid=uid("i");const dup={...JSON.parse(JSON.stringify(item)),id:nid,name:item.name+" (copy)"};addIt(dup);setSelIt(nid);toast(`Duplicated "${item.name}"`);openIt(dup)},[addIt,toast,openIt]);
+  const dupIt=useCallback(item=>{const nid=uid("i");const dup={...JSON.parse(JSON.stringify(item)),id:nid,name:item.name+" (Copy)",isAlsoSpace:""};addIt(dup);setSelIt(nid);toast(`Duplicated "${item.name}"`);openIt(dup)},[addIt,toast,openIt]);
 
   // Expand
   const togE=useCallback(sid=>setExp(p=>({...p,[sid]:!p[sid]})),[]);
@@ -677,7 +677,7 @@ export default function App(){
     {/* Custom title bar */}
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
       <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
-        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}{latestVersion&&<span data-allow-ctx onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,flexShrink:0}}/>}
+        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}{latestVersion&&<span onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,flexShrink:0}}/>}
       </div>
       <div style={{display:"flex",height:"100%"}}>
         <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
