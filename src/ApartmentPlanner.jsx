@@ -18,6 +18,10 @@ const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
 const FREQ=["","Daily","Weekdays","Weekends","2x per Week","3x per Week","4x per Week","5x per Week","6x per Week","Weekly","Bi-Weekly","Monthly","Quarterly","As Needed"];
 const uid=p=>`${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,6)}`;
+// Font scale helper: bumps sizes by 2px on macOS for better visual parity with native apps.
+// Only applied to body text (13-15px range). Micro-labels (9-11px) and fixed-height elements stay unscaled.
+let _isMacFs=false;
+const fs=(base)=>_isMacFs&&base>=12?base+2:base;
 
 // Number formatting
 const fmt=n=>{if(n==null||isNaN(n))return"0";const v=Number(n);return v%1===0?v.toLocaleString("en-US"):v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})};
@@ -63,19 +67,21 @@ function Mod({t,title,onClose,children,width=500}){return(<div style={{position:
 function Fld({t,label,children,error}){return(<div style={{marginBottom:14}}><label style={{fontSize:11,color:error?t.wn:t.txD,textTransform:"uppercase",letterSpacing:1,display:"block",marginBottom:5}}>{label}{error&&<span style={{fontStyle:"italic",textTransform:"none",letterSpacing:0}}> — {error}</span>}</label>{children}</div>)}
 
 const mkS=t=>({
-  input:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.bdI}`,borderRadius:6,color:t.tx,fontSize:13,fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
-  inputE:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.wnBd}`,borderRadius:6,color:t.tx,fontSize:13,fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
-  sel:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.bdI}`,borderRadius:6,color:t.tx,fontSize:13,fontFamily:"inherit",outline:"none",boxSizing:"border-box",appearance:"none",cursor:"pointer"},
-  bP:{padding:"8px 20px",background:t.ac,color:t.bg,border:"none",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit"},
-  bS:{padding:"8px 20px",background:t.btnBg,color:t.txM,border:`1px solid ${t.bdI}`,borderRadius:6,fontSize:13,cursor:"pointer",fontFamily:"inherit"},
-  bD:{padding:"8px 20px",background:t.btnBg,color:t.wn,border:`1px solid ${t.wnBd}`,borderRadius:6,fontSize:13,cursor:"pointer",fontFamily:"inherit"},
-  bSm:{padding:"4px 10px",background:t.bsBg,border:`1px solid ${t.bd}`,borderRadius:4,fontSize:11,cursor:"pointer",color:t.txM,fontFamily:"inherit"},
+  input:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.bdI}`,borderRadius:6,color:t.tx,fontSize:fs(13),fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
+  inputE:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.wnBd}`,borderRadius:6,color:t.tx,fontSize:fs(13),fontFamily:"inherit",outline:"none",boxSizing:"border-box"},
+  sel:{width:"100%",padding:"8px 12px",background:t.inBg,border:`1px solid ${t.bdI}`,borderRadius:6,color:t.tx,fontSize:fs(13),fontFamily:"inherit",outline:"none",boxSizing:"border-box",appearance:"none",cursor:"pointer"},
+  bP:{padding:"8px 20px",background:t.ac,color:t.bg,border:"none",borderRadius:6,fontSize:fs(13),fontWeight:600,cursor:"pointer",fontFamily:"inherit"},
+  bS:{padding:"8px 20px",background:t.btnBg,color:t.txM,border:`1px solid ${t.bdI}`,borderRadius:6,fontSize:fs(13),cursor:"pointer",fontFamily:"inherit"},
+  bD:{padding:"8px 20px",background:t.btnBg,color:t.wn,border:`1px solid ${t.wnBd}`,borderRadius:6,fontSize:fs(13),cursor:"pointer",fontFamily:"inherit"},
+  bSm:{padding:"4px 10px",background:t.bsBg,border:`1px solid ${t.bd}`,borderRadius:4,fontSize:fs(12),cursor:"pointer",color:t.txM,fontFamily:"inherit"},
 });
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 export default function App(){
-  const[dark,setDark]=useState(true); // will be set from config on load
-  const t=dark?TH.dark:TH.light;const s=useMemo(()=>mkS(t),[t]);
+  const[dark,setDark]=useState(true);
+  const[isMac,setIsMac]=useState(false);
+  const[winFocused,setWinFocused]=useState(true);
+  const t=dark?TH.dark:TH.light;const s=useMemo(()=>mkS(t),[t,isMac]);
   const[data,setData]=useState(null);const[loading,setLoading]=useState(true);
   const[view,setView]=useState("spatial");const[selSp,setSelSp]=useState("s_apt");const[selPr,setSelPr]=useState(null);const[selIt,setSelIt]=useState(null);
   const[search,setSearch]=useState("");const[filter,setFilter]=useState("all");const[modal,setModal]=useState(null);
@@ -93,8 +99,6 @@ export default function App(){
   const[cfm,setCfm]=useState(null); // {title, msg, okLabel, buttons, resolve}
   const[isMaximized,setIsMaximized]=useState(false);
   const[latestVersion,setLatestVersion]=useState(null); // {version, url} or null
-  const[isMac,setIsMac]=useState(false);
-  const[winFocused,setWinFocused]=useState(true);
   const askConfirm=useCallback((msgOrOpts)=>{
     const opts=typeof msgOrOpts==="string"?{msg:msgOrOpts}:msgOrOpts;
     return new Promise(resolve=>setCfm({title:opts.title||null,msg:opts.msg,okLabel:opts.okLabel||"Ok",buttons:opts.buttons||null,resolve}));
@@ -113,7 +117,9 @@ export default function App(){
   // Track maximized state for title bar button
   useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
   // Detect platform once
-  useEffect(()=>{try{setIsMac(osPlatform()==="macos")}catch{}},[]);
+  useEffect(()=>{try{const p=osPlatform()==="macos";setIsMac(p);_isMacFs=p}catch{}},[]);
+  // Menu bar event listener (macOS only — fires from native menu)
+  useEffect(()=>{let unlisten;(async()=>{try{const{listen}=await import("@tauri-apps/api/event");unlisten=await listen("menu-action",e=>{const id=e.payload;if(id==="menu_new")startNew();else if(id==="menu_open_file")openFile();else if(id==="menu_see_sample")resetDef();else if(id==="menu_save"){if(activePath)quickSave();else saveAs(data?.name||"plan")}})}catch{}})();return()=>{if(unlisten)unlisten()}},[startNew,openFile,resetDef,activePath,quickSave,saveAs,data]);
   // Track window focus for traffic light dimming on Mac
   useEffect(()=>{const w=getCurrentWindow();const unlisten=w.onFocusChanged(({payload})=>setWinFocused(payload));return()=>{unlisten.then(f=>f()).catch(()=>{})}},[]);
 

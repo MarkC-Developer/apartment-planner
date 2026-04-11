@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+#[cfg(target_os = "macos")]
+use tauri::Emitter;
 
 // ─── App Config ────────────────────────────────────────────────────────────
 
@@ -161,6 +163,25 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
+        .setup(|app| {
+            #[cfg(target_os = "macos")]
+            {
+                use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+                let new_item = MenuItemBuilder::with_id("menu_new", "New").accelerator("CmdOrCtrl+N").build(app)?;
+                let open_file = MenuItemBuilder::with_id("menu_open_file", "Open File…").accelerator("CmdOrCtrl+O").build(app)?;
+                let see_sample = MenuItemBuilder::with_id("menu_see_sample", "See Sample").build(app)?;
+                let open_submenu = SubmenuBuilder::new(app, "Open").items(&[&open_file, &see_sample]).build()?;
+                let save_item = MenuItemBuilder::with_id("menu_save", "Save").accelerator("CmdOrCtrl+S").build(app)?;
+                let file_menu = SubmenuBuilder::new(app, "File").items(&[&new_item, &open_submenu, &save_item]).build()?;
+                let app_menu = SubmenuBuilder::new(app, "Apartment Planner").about(Some(Default::default())).separator().services().separator().hide().hide_others().show_all().separator().quit().build()?;
+                let menu = MenuBuilder::new(app).items(&[&app_menu, &file_menu]).build()?;
+                app.set_menu(menu)?;
+                app.on_menu_event(move |app_handle, event| {
+                    let _ = app_handle.emit("menu-action", event.id().0.clone());
+                });
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             read_plan,
             write_plan,
