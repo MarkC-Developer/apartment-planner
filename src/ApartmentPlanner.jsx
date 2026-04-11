@@ -690,12 +690,12 @@ export default function App(){
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
       {isMac?<>
         {/* macOS traffic lights on left */}
-        <div style={{display:"flex",gap:8,padding:"0 13px",alignItems:"center"}} className="tl-group">
+        <div style={{display:"flex",gap:8,paddingLeft:8,paddingRight:8,alignItems:"center"}} className="tl-group">
           {[
-            {c:"#ff5f57",hc:"#e0443e",sym:"×",act:()=>win.close()},
-            {c:"#febc2e",hc:"#dea123",sym:"−",act:()=>win.minimize()},
-            {c:"#28c840",hc:"#1aab29",sym:"+",act:()=>win.toggleMaximize()}
-          ].map((b,i)=><div key={i} onClick={b.act} onMouseDown={e=>{e.currentTarget.style.filter="brightness(0.85)"}} onMouseUp={e=>{e.currentTarget.style.filter=""}} onMouseLeave={e=>{e.currentTarget.style.filter="";e.currentTarget.querySelector("span").style.opacity=0}} onMouseEnter={e=>{e.currentTarget.querySelector("span").style.opacity=1}} style={{width:12,height:12,borderRadius:"50%",background:winFocused?b.c:"#4d4d4d",border:winFocused?`0.5px solid ${b.hc}`:"0.5px solid #3d3d3d",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"filter 0.08s"}}><span style={{fontSize:9,color:"rgba(0,0,0,0.6)",fontWeight:700,lineHeight:1,opacity:0,transition:"opacity 0.1s",pointerEvents:"none"}}>{b.sym}</span></div>)}
+            {c:"#ff6159",hc:"#bf4942",ic:"#4d0000",sym:"×",act:()=>win.close()},
+            {c:"#ffbd2e",hc:"#bf8e22",ic:"#995700",sym:"−",act:()=>win.minimize()},
+            {c:"#28c941",hc:"#1d9730",ic:"#006500",sym:"+",act:()=>win.toggleMaximize()}
+          ].map((b,i)=><div key={i} onClick={b.act} onMouseDown={e=>{e.currentTarget.style.background=b.hc}} onMouseUp={e=>{e.currentTarget.style.background=winFocused?b.c:"#4d4d4d"}} onMouseLeave={e=>{e.currentTarget.style.background=winFocused?b.c:"#4d4d4d";e.currentTarget.querySelector("span").style.opacity=0}} onMouseEnter={e=>{e.currentTarget.querySelector("span").style.opacity=1}} style={{width:12,height:12,borderRadius:"50%",background:winFocused?b.c:"#4d4d4d",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0,transition:"background 0.08s"}}><span style={{fontSize:10,color:b.ic,fontWeight:700,lineHeight:1,opacity:0,transition:"opacity 0.1s",pointerEvents:"none",marginTop:-1}}>{b.sym}</span></div>)}
         </div>
         {/* Centered title (absolute so update dot doesn't shift it) */}
         <div data-tauri-drag-region style={{position:"absolute",left:0,right:0,top:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
