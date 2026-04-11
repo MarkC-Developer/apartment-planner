@@ -32,5 +32,5 @@ The app will then open normally. This is a one-time step.
 
 ## Attribution
 
-Icon design created by <a href="https://www.flaticon.com/free-icons/creative-industry" title="creative industry icons">Kerismaker</a>, recolored and used non-commercially.
+Icon design created by <a href="https://www.flaticon.com/free-icon/draw_13559003">Kerismaker</a>, recolored and used non-commercially.
 
