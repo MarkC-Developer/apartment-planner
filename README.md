@@ -14,7 +14,7 @@ A spatial and process planning tool. Developed as an experiment of using Claude 
 Because the app is unsigned, macOS may say it is "damaged and can't be opened" after installing. The app is not actually damaged — macOS blocks unsigned apps by default. After dragging the app to Applications, open Terminal and run:
 
 ```
-xattr -cr /Applications/Apartment\\ Planner.app
+xattr -cr "/Applications/Apartment Planner.app"
 ```
 
 The app will then open normally. This is a one-time step.
