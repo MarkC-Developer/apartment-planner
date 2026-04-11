@@ -5,13 +5,14 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { save as saveDialog, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { platform as osPlatform } from "@tauri-apps/plugin-os";
 
 // ─── THEMES ───────────────────────────────────────────────────────────────────
 const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"rgba(255,255,255,0.025)",tx:"#e8e4de",txM:"#a09b93",txD:"#7a7670",bd:"rgba(255,255,255,0.06)",bdL:"rgba(255,255,255,0.04)",bdI:"rgba(255,255,255,0.1)",ac:"#7BA89D",acBg:"rgba(123,168,157,0.18)",acBd:"rgba(123,168,157,0.4)",acS:"rgba(123,168,157,0.2)",wn:"#D2856B",wnBg:"rgba(210,133,107,0.15)",wnBd:"rgba(210,133,107,0.4)",wnS:"rgba(210,133,107,0.12)",pp:"#9B7BB8",ppBg:"rgba(155,123,184,0.15)",bl:"#6B8FD2",inBg:"rgba(255,255,255,0.03)",btnBg:"rgba(255,255,255,0.07)",bsBg:"rgba(255,255,255,0.07)",tgBg:"rgba(255,255,255,0.06)",cr:"#3a3835",mBg:"#242220",selBg:"#242220",selTx:"#e8e4de",selH:"#3a3835",tBg:"#2d2a27",tBd:"rgba(123,168,157,0.3)",dBg:"#2d2a27",dH:"#3a3835",dBd:"rgba(255,255,255,0.1)"},
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.4.3";
+const VERSION="v1.4.5";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -92,6 +93,8 @@ export default function App(){
   const[cfm,setCfm]=useState(null); // {title, msg, okLabel, buttons, resolve}
   const[isMaximized,setIsMaximized]=useState(false);
   const[latestVersion,setLatestVersion]=useState(null); // {version, url} or null
+  const[isMac,setIsMac]=useState(false);
+  const[winFocused,setWinFocused]=useState(true);
   const askConfirm=useCallback((msgOrOpts)=>{
     const opts=typeof msgOrOpts==="string"?{msg:msgOrOpts}:msgOrOpts;
     return new Promise(resolve=>setCfm({title:opts.title||null,msg:opts.msg,okLabel:opts.okLabel||"Ok",buttons:opts.buttons||null,resolve}));
@@ -109,6 +112,11 @@ export default function App(){
   useEffect(()=>{let el=document.getElementById("apt-ts");if(!el){el=document.createElement("style");el.id="apt-ts";document.head.appendChild(el)}el.textContent=`select,option{background:${t.selBg}!important;color:${t.selTx}!important}option:checked{background:${t.selH}!important}select:focus{outline:1px solid ${t.acBd}}body{background:${t.bg}}`},[t]);
   // Track maximized state for title bar button
   useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
+  // Detect platform once
+  useEffect(()=>{try{setIsMac(osPlatform()==="macos")}catch{}},[]);
+  // Track window focus for traffic light dimming on Mac
+  useEffect(()=>{const w=getCurrentWindow();const unlisten=w.onFocusChanged(({payload})=>setWinFocused(payload));return()=>{unlisten.then(f=>f()).catch(()=>{})}},[]);
+
   // Disable default browser right-click menu
   useEffect(()=>{const h=e=>{if(!e.target.closest("[data-allow-ctx]"))e.preventDefault()};document.addEventListener("contextmenu",h);return()=>document.removeEventListener("contextmenu",h)},[]);
 
@@ -128,7 +136,11 @@ export default function App(){
   useEffect(()=>{(async()=>{
     try{
       const cfg=await invoke("get_app_config");
-      setDark(cfg.theme!=="light");
+      // Use system theme if config has default "dark" and user hasn't customized
+      if(cfg.theme==="dark"&&window.matchMedia){
+        const prefersLight=window.matchMedia("(prefers-color-scheme: light)").matches;
+        if(prefersLight)setDark(false);else setDark(true);
+      } else setDark(cfg.theme!=="light");
       setRecentFiles(cfg.recent_files||[]);
       setLastDir(cfg.last_dir||"");
       // Try to open last file
@@ -675,22 +687,43 @@ export default function App(){
   const win=getCurrentWindow();
   return(<div style={{fontFamily:"'DM Sans','Helvetica Neue',sans-serif",background:t.bg,color:t.tx,height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
     {/* Custom title bar */}
-    <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",justifyContent:"space-between",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
-      <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
-        <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}{latestVersion&&<span onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,flexShrink:0}}/>}
-      </div>
-      <div style={{display:"flex",height:"100%"}}>
-        <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-          <svg width="10" height="1" viewBox="0 0 10 1"><line x1="0" y1="0.5" x2="10" y2="0.5" stroke="currentColor" strokeWidth="1"/></svg>
+    <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
+      {isMac?<>
+        {/* macOS traffic lights on left */}
+        <div style={{display:"flex",gap:8,padding:"0 13px",alignItems:"center"}} className="tl-group">
+          {[
+            {c:"#ff5f57",hc:"#e0443e",sym:"×",act:()=>win.close()},
+            {c:"#febc2e",hc:"#dea123",sym:"−",act:()=>win.minimize()},
+            {c:"#28c840",hc:"#1aab29",sym:"+",act:()=>win.toggleMaximize()}
+          ].map((b,i)=><div key={i} onClick={b.act} onMouseDown={e=>{e.currentTarget.style.filter="brightness(0.85)"}} onMouseUp={e=>{e.currentTarget.style.filter=""}} onMouseLeave={e=>{e.currentTarget.style.filter="";e.currentTarget.querySelector("span").style.opacity=0}} onMouseEnter={e=>{e.currentTarget.querySelector("span").style.opacity=1}} style={{width:12,height:12,borderRadius:"50%",background:winFocused?b.c:"#4d4d4d",border:winFocused?`0.5px solid ${b.hc}`:"0.5px solid #3d3d3d",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"filter 0.08s"}}><span style={{fontSize:9,color:"rgba(0,0,0,0.6)",fontWeight:700,lineHeight:1,opacity:0,transition:"opacity 0.1s",pointerEvents:"none"}}>{b.sym}</span></div>)}
         </div>
-        <div onClick={()=>win.toggleMaximize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-          {isMaximized?<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="2" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="1"/><polyline points="2,2 2,0 10,0 10,8 8,8" fill="none" stroke="currentColor" strokeWidth="1"/></svg>
-          :<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="0" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1"/></svg>}
+        {/* Centered title (absolute so update dot doesn't shift it) */}
+        <div data-tauri-drag-region style={{position:"absolute",left:0,right:0,top:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
+          <span data-tauri-drag-region style={{fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em"}}>Apartment Planner {VERSION}</span>
+          {latestVersion&&<span onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,pointerEvents:"auto"}}/>}
         </div>
-        <div onClick={()=>win.close()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>{e.currentTarget.style.background="#c42b1c";e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=t.txD}}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" strokeWidth="1.2"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" strokeWidth="1.2"/></svg>
+        {/* App icon on right */}
+        <div data-tauri-drag-region style={{marginLeft:"auto",paddingRight:10,display:"flex",alignItems:"center"}}>
+          <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/>
         </div>
-      </div>
+      </>:<>
+        {/* Windows: icon+title left, controls right */}
+        <div data-tauri-drag-region style={{paddingLeft:10,fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em",display:"flex",alignItems:"center",gap:7,flex:1}}>
+          <img src="/app-icon.png" alt="" style={{width:16,height:16,borderRadius:2}}/> Apartment Planner {VERSION}{latestVersion&&<span onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,flexShrink:0}}/>}
+        </div>
+        <div style={{display:"flex",height:"100%"}}>
+          <div onClick={()=>win.minimize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"} onMouseDown={e=>e.currentTarget.style.background=t.srfS}>
+            <svg width="10" height="1" viewBox="0 0 10 1"><line x1="0" y1="0.5" x2="10" y2="0.5" stroke="currentColor" strokeWidth="1"/></svg>
+          </div>
+          <div onClick={()=>win.toggleMaximize()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>e.currentTarget.style.background=t.srfH} onMouseLeave={e=>e.currentTarget.style.background="transparent"} onMouseDown={e=>e.currentTarget.style.background=t.srfS}>
+            {isMaximized?<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="2" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="1"/><polyline points="2,2 2,0 10,0 10,8 8,8" fill="none" stroke="currentColor" strokeWidth="1"/></svg>
+            :<svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="0" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1"/></svg>}
+          </div>
+          <div onClick={()=>win.close()} style={{width:46,height:"100%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:t.txD}} onMouseEnter={e=>{e.currentTarget.style.background="#c42b1c";e.currentTarget.style.color="#fff"}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=t.txD}}>
+            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" strokeWidth="1.2"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" strokeWidth="1.2"/></svg>
+          </div>
+        </div>
+      </>}
     </div>
 
     {/* Custom confirm modal */}
