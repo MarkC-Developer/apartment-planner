@@ -6,13 +6,14 @@ import { save as saveDialog, open as openDialog } from "@tauri-apps/plugin-dialo
 import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { platform as osPlatform } from "@tauri-apps/plugin-os";
+import { listen } from "@tauri-apps/api/event";
 
 // ─── THEMES ───────────────────────────────────────────────────────────────────
 const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"rgba(255,255,255,0.025)",tx:"#e8e4de",txM:"#a09b93",txD:"#7a7670",bd:"rgba(255,255,255,0.06)",bdL:"rgba(255,255,255,0.04)",bdI:"rgba(255,255,255,0.1)",ac:"#7BA89D",acBg:"rgba(123,168,157,0.18)",acBd:"rgba(123,168,157,0.4)",acS:"rgba(123,168,157,0.2)",wn:"#D2856B",wnBg:"rgba(210,133,107,0.15)",wnBd:"rgba(210,133,107,0.4)",wnS:"rgba(210,133,107,0.12)",pp:"#9B7BB8",ppBg:"rgba(155,123,184,0.15)",bl:"#6B8FD2",inBg:"rgba(255,255,255,0.03)",btnBg:"rgba(255,255,255,0.07)",bsBg:"rgba(255,255,255,0.07)",tgBg:"rgba(255,255,255,0.06)",cr:"#3a3835",mBg:"#242220",selBg:"#242220",selTx:"#e8e4de",selH:"#3a3835",tBg:"#2d2a27",tBd:"rgba(123,168,157,0.3)",dBg:"#2d2a27",dH:"#3a3835",dBd:"rgba(255,255,255,0.1)"},
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.4.5";
+const VERSION="v1.4.6";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -94,7 +95,7 @@ export default function App(){
   const[lastDir,setLastDir]=useState(""); // last-used directory for dialogs
   const[treeFilter,setTreeFilter]=useState(null); // null | "owned" | "needed"
   const[depth,setDepth]=useState("full"); // "full" | "current"
-  const nameRef=useRef(null);const undoRef=useRef(null);const toastTimer=useRef(null);const listRef=useRef(null);const scrollSave=useRef(null);
+  const nameRef=useRef(null);const toastTimer=useRef(null);const listRef=useRef(null);const scrollSave=useRef(null);
   const[ctxMenu,setCtxMenu]=useState(null); // {x, y} for right-click context menu
   const[cfm,setCfm]=useState(null); // {title, msg, okLabel, buttons, resolve}
   const[isMaximized,setIsMaximized]=useState(false);
@@ -118,8 +119,6 @@ export default function App(){
   useEffect(()=>{const w=getCurrentWindow();const check=async()=>{setIsMaximized(await w.isMaximized())};check();const iv=setInterval(check,500);return()=>clearInterval(iv)},[]);
   // Detect platform once
   useEffect(()=>{try{const p=osPlatform()==="macos";setIsMac(p);_isMacFs=p}catch{}},[]);
-  // Menu bar event listener (macOS only — fires from native menu)
-  useEffect(()=>{let unlisten;(async()=>{try{const{listen}=await import("@tauri-apps/api/event");unlisten=await listen("menu-action",e=>{const id=e.payload;if(id==="menu_new")startNew();else if(id==="menu_open_file")openFile();else if(id==="menu_see_sample")resetDef();else if(id==="menu_save"){if(activePath)quickSave();else saveAs(data?.name||"plan")}})}catch{}})();return()=>{if(unlisten)unlisten()}},[startNew,openFile,resetDef,activePath,quickSave,saveAs,data]);
   // Track window focus for traffic light dimming on Mac
   useEffect(()=>{const w=getCurrentWindow();const unlisten=w.onFocusChanged(({payload})=>setWinFocused(payload));return()=>{unlisten.then(f=>f()).catch(()=>{})}},[]);
 
@@ -255,6 +254,9 @@ export default function App(){
     setSelSp("s_apt");setSelPr(null);setSelIt(null);toast("Viewing sample")
   },[activePath,dirty,data,writePlan,toast,askConfirm]);
 
+  // Menu bar event listener (macOS — fires from native menu items)
+  useEffect(()=>{let un;listen("menu-action",e=>{const id=e.payload;if(id==="menu_new")startNew();else if(id==="menu_open_file")openFile();else if(id==="menu_see_sample")resetDef();else if(id==="menu_save"){if(activePath)quickSave();else saveAs(data?.name||"plan")}}).then(f=>{un=f}).catch(()=>{});return()=>{if(un)un()}},[startNew,openFile,resetDef,activePath,quickSave,saveAs,data]);
+
   // Rename: write to new path, delete old file (within same directory)
   const renamePlan=useCallback(async(newName)=>{
     if(!activePath)return;
@@ -288,7 +290,7 @@ export default function App(){
 
   // Mutations with undo
   const upd=useCallback(fn=>{setData(prev=>{const n=JSON.parse(JSON.stringify(prev));fn(n);setDirty(true);return n})},[]);
-  const updU=useCallback((fn,msg)=>{const snap=JSON.parse(JSON.stringify(data));upd(fn);toast(msg,()=>{setData(snap);setDirty(true);clearToast()})},[data,upd,toast,clearToast]);
+
 
   const addIt=useCallback(i=>upd(d=>d.items.push(i)),[upd]);
   const edIt=useCallback((id,u)=>upd(d=>{const i=d.items.findIndex(x=>x.id===id);if(i>=0)Object.assign(d.items[i],u)}),[upd]);
