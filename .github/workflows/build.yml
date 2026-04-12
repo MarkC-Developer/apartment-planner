@@ -15,9 +15,9 @@ jobs:
       matrix:
         include:
           - platform: windows-latest
-            args: ''
+            args: '--bundles msi'
           - platform: macos-latest
-            args: '--target aarch64-apple-darwin'
+            args: '--target aarch64-apple-darwin --bundles dmg'
 
     runs-on: ${{ matrix.platform }}
     
@@ -40,6 +40,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+          shared-key: 'tauri-build'
+          cache-on-failure: true
 
       - name: Install frontend dependencies
         run: npm install

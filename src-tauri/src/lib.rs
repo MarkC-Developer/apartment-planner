@@ -163,9 +163,10 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
-        .setup(|app| {
+        .setup(|_app| {
             #[cfg(target_os = "macos")]
             {
+                let app = _app;
                 use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
                 let new_item = MenuItemBuilder::with_id("menu_new", "New").accelerator("CmdOrCtrl+N").build(app)?;
                 let open_file = MenuItemBuilder::with_id("menu_open_file", "Open File…").accelerator("CmdOrCtrl+O").build(app)?;
