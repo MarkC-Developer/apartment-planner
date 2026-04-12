@@ -14,10 +14,19 @@ A spatial and process planning tool. Developed as an experiment of using Claude 
 Because the app is unsigned, macOS may say it is "damaged and can't be opened" after installing. The app is not actually damaged — macOS blocks unsigned apps by default. After dragging the app to Applications, open Terminal and run:
 
 ```
-xattr -cr "/Applications/Apartment Planner.app"
+xattr -rd com.apple.quarantine "/Applications/Apartment Planner.app"
 ```
 
-The app will then open normally. This is a one-time step.
+The app should then open normally. This is a one-time step.
+
+**If the app still says it is damaged after running the command above**, the ad-hoc code signature needs to be reapplied. Run both commands:
+
+```
+xattr -cr "/Applications/Apartment Planner.app"
+codesign --force --deep --sign - "/Applications/Apartment Planner.app"
+```
+
+Then open the app again.
 
 ## How Data Storage Works
 

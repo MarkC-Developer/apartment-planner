@@ -13,7 +13,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.4.7";
+const VERSION="v1.4.8";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
