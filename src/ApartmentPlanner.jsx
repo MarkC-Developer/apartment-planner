@@ -13,7 +13,7 @@ const TH={dark:{bg:"#1a1816",srf:"#242220",srfH:"rgba(255,255,255,0.07)",srfS:"r
 light:{bg:"#FEFCEF",srf:"#f2f0e3",srfH:"rgba(0,0,0,0.06)",srfS:"rgba(0,0,0,0.02)",tx:"#2a2722",txM:"#6b665e",txD:"#9b9588",bd:"rgba(0,0,0,0.08)",bdL:"rgba(0,0,0,0.05)",bdI:"rgba(0,0,0,0.12)",ac:"#4d8577",acBg:"rgba(77,133,119,0.12)",acBd:"rgba(77,133,119,0.4)",acS:"rgba(77,133,119,0.15)",wn:"#c46545",wnBg:"rgba(196,101,69,0.1)",wnBd:"rgba(196,101,69,0.4)",wnS:"rgba(196,101,69,0.08)",pp:"#7a5a9e",ppBg:"rgba(122,90,158,0.1)",bl:"#4a6aaa",inBg:"rgba(0,0,0,0.02)",btnBg:"rgba(0,0,0,0.06)",bsBg:"rgba(0,0,0,0.06)",tgBg:"rgba(0,0,0,0.06)",cr:"#ccc8b8",mBg:"#f5f3e6",selBg:"#f5f3e6",selTx:"#2a2722",selH:"#e8e5d6",tBg:"#f0eedd",tBd:"rgba(77,133,119,0.3)",dBg:"#f5f3e6",dH:"#e8e5d6",dBd:"rgba(0,0,0,0.12)"}};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-const VERSION="v1.4.9";
+const VERSION="v1.4.10";
 const TI={unit:"◈",room:"▣",zone:"◫",furniture:"▤",container:"▨",fixture:"◉"};
 const TOPTS=["container","fixture","furniture","room","zone"];
 const CC={Skincare:"#7BA89D","Body Care":"#7BA89D","Hair Care":"#7BA89D",Fixture:"#8B8FA3",Textile:"#A38B7B",Cleaning:"#6B9BD2",Cookware:"#D2856B",Appliance:"#D2856B",Kitchen:"#D2856B",Furniture:"#9B7BB8",Electronics:"#6B8FD2",Organization:"#8B8FA3",Fitness:"#B87B7B",Laundry:"#7B8FA3"};
@@ -697,17 +697,11 @@ export default function App(){
     {/* Custom title bar */}
     <div data-tauri-drag-region style={{height:32,flexShrink:0,background:t.srf,borderBottom:`1px solid ${t.bd}`,display:"flex",alignItems:"center",userSelect:"none",WebkitUserSelect:"none",position:"relative",zIndex:1100}}>
       {isMac?<>
-        {/* macOS traffic lights on left */}
-        <div style={{display:"flex",gap:8,paddingLeft:8,paddingRight:8,alignItems:"center"}} className="tl-group">
-          {[
-            {c:"#ff6159",hc:"#bf4942",ic:"#4d0000",sym:"×",act:()=>win.close()},
-            {c:"#ffbd2e",hc:"#bf8e22",ic:"#995700",sym:"−",act:()=>win.minimize()},
-            {c:"#28c941",hc:"#1d9730",ic:"#006500",sym:"+",act:()=>win.toggleMaximize()}
-          ].map((b,i)=><div key={i} onClick={b.act} onMouseDown={e=>{e.currentTarget.style.background=b.hc}} onMouseUp={e=>{e.currentTarget.style.background=winFocused?b.c:"#4d4d4d"}} onMouseLeave={e=>{e.currentTarget.style.background=winFocused?b.c:"#4d4d4d";e.currentTarget.querySelector("span").style.opacity=0}} onMouseEnter={e=>{e.currentTarget.querySelector("span").style.opacity=1}} style={{width:12,height:12,borderRadius:"50%",background:winFocused?b.c:"#4d4d4d",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0,transition:"background 0.08s"}}><span style={{fontSize:10,color:b.ic,fontWeight:700,lineHeight:1,opacity:0,transition:"opacity 0.1s",pointerEvents:"none",marginTop:-1}}>{b.sym}</span></div>)}
-        </div>
+        {/* Left spacer for native macOS traffic lights (rendered by OS via titleBarStyle:Overlay) */}
+        <div data-tauri-drag-region style={{width:78,height:"100%",flexShrink:0}}/>
         {/* Centered title (absolute so update dot doesn't shift it) */}
         <div data-tauri-drag-region style={{position:"absolute",left:0,right:0,top:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
-          <span data-tauri-drag-region style={{fontSize:12,color:t.txM,fontWeight:600,letterSpacing:"0.01em"}}>Apartment Planner {VERSION}</span>
+          <span data-tauri-drag-region style={{fontSize:13,color:t.txM,fontWeight:600,letterSpacing:"0.01em"}}>Apartment Planner {VERSION}</span>
           {latestVersion&&<span onClick={()=>shellOpen(latestVersion.url)} title={`Version ${latestVersion.version} now available`} style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#4a9eff",cursor:"pointer",marginLeft:6,pointerEvents:"auto"}}/>}
         </div>
         {/* App icon on right */}
